@@ -1,0 +1,22 @@
+[
+    { "name": "Шостка", "coords": [33.4698, 51.8630], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Конотоп", "coords": [33.2026, 51.2403], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Ніжин", "coords": [31.8869, 51.0480], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Ромни", "coords": [33.4747, 50.7420], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Охтирка", "coords": [34.8931, 50.3087], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Бердичів", "coords": [28.5999, 49.8903], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Коростень", "coords": [28.6481, 50.9526], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Умань", "coords": [30.2208, 48.7484], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Олександрія", "coords": [33.1091, 48.6685], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Кременчук", "coords": [33.4116, 49.0649], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Ізюм", "coords": [37.2654, 49.2045], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Лозова", "coords": [36.3533, 48.8876], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Павлоград", "coords": [35.8679, 48.5323], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Нікополь", "coords": [34.3976, 47.5750], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Мелітополь", "coords": [35.3695, 46.8501], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Бердянськ", "coords": [36.7860, 46.7583], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Кам'янець-Подільський", "coords": [26.5856, 48.6800], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Ужгород", "coords": [22.2871, 48.6208], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Мукачево", "coords": [22.7196, 48.4419], "type": "ray", "dot": false, "minZoom": 5 },
+    { "name": "Ізмаїл", "coords": [28.8351, 45.3464], "type": "ray", "dot": false, "minZoom": 5 }
+]

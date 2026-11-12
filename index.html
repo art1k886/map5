@@ -1,0 +1,3877 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Карта НП</title>
+  
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('./Inter.otf') format('opentype');
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'CustomArial';
+      src: url('./arialmt.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'CustomArial';
+      src: url('./arialmt.ttf') format('truetype');
+      font-weight: bold;
+      font-style: normal;
+    }
+    * { box-sizing: border-box; }
+
+    /* ── Маркери населених пунктів (з index.html) ── */
+    .marker-with-dot,
+    .marker-center {
+      position: relative;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      user-select: none;
+      transition: opacity 0.3s ease-in-out;
+      opacity: 1;
+    }
+    .marker-hidden { display: none !important; }
+    .map-label {
+      position: absolute;
+      white-space: nowrap;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .map-label::after {
+      content: attr(data-shadow);
+      position: absolute;
+      left: 1.5px;
+      top: 1.5px;
+      color: rgba(255, 255, 255, 0.75);
+      z-index: -1;
+    }
+    .style-obl {
+      font-family: 'CustomArial', Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #111111;
+    }
+    .style-ray {
+      font-family: 'CustomArial', Arial, sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .style-selo {
+      font-family: 'CustomArial', Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 400;
+      color: #2b2b2b;
+    }
+    .custom-dot {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 4px;
+      background-color: #333333;
+      border: 1px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0.6px rgba(0, 0, 0, 0.25);
+      transform: translate(-50%, -50%);
+    }
+    .marker-with-dot .map-label { left: 6px; top: 4px; }
+    .marker-center .map-label {
+      left: 0; top: 0;
+      transform: translate(-50%, -50%);
+    }
+
+    body {
+      margin: 0; padding: 0;
+      background-color: #121212;
+      font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    
+    #map {
+      position: absolute;
+      top: 0; bottom: 0; width: 100%;
+    }
+
+    .controls-panel {
+      position: absolute;
+      top: 52px; left: 10px;
+      z-index: 1000;
+      background: rgba(18, 18, 18, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 280px;
+      max-height: calc(100vh - 70px);
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      transition: max-height 0.3s ease;
+    }
+
+    .controls-panel::-webkit-scrollbar { width: 4px; }
+    .controls-panel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .controls-panel {
+        width: calc(100% - 70px);
+        max-height: 50vh;
+      }
+    }
+
+    .panel-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .panel-title {
+      color: #38bdf8;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .icons-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 6px;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 10px;
+      font-weight: 600;
+      touch-action: manipulation;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .icon-btn img {
+      width: 16px; height: 16px;
+      object-fit: contain;
+    }
+
+    .objects-list-wrapper {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 4px;
+      max-height: 150px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .objects-list-wrapper::-webkit-scrollbar { width: 3px; }
+    .objects-list-wrapper::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .object-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 6px;
+      border-radius: 5px;
+      font-size: 10px;
+      color: #f1f5f9;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      user-select: none;
+    }
+
+    .object-item:hover { background: rgba(56, 189, 248, 0.2); }
+
+    .object-item-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .object-item-info img {
+      width: 16px; height: 16px;
+      object-fit: contain;
+    }
+
+    .object-item-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .batch-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #e2e8f0;
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-size: 9px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-size: 9px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .empty-msg {
+      color: #64748b;
+      font-size: 10px;
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .legend-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 15px;
+      z-index: 1000;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 2px solid #000000;
+      padding: 7px 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      pointer-events: none;
+      user-select: none;
+      width: 280px;
+      max-width: 280px;
+      transition: opacity 0.2s ease, top 0.2s, left 0.2s, right 0.2s, bottom 0.2s;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 600px) {
+      .legend-panel {
+        bottom: 10px;
+        left: 10px;
+        padding: 8px 10px;
+        width: 260px;
+        max-width: 260px;
+      }
+    }
+
+    .disclaimer-text {
+      color: #1a1a1a;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.3;
+      white-space: pre-wrap;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 10px;
+      padding-top: 2px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #0f172a;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .legend-item img {
+      width: 17px;
+      height: 17px;
+      object-fit: contain;
+    }
+
+    .datetime-panel {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1001;
+      transition: top 0.2s, left 0.2s, right 0.2s, bottom 0.2s;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 2px solid #000000;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      pointer-events: none;
+      user-select: none;
+      width: fit-content;
+      white-space: nowrap;
+      transition: opacity 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .datetime-text {
+      color: #1a1a1a;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+    }
+
+    #screenshot-selection-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      cursor: crosshair;
+      background: rgba(5, 10, 20, 0.08);
+      user-select: none;
+      touch-action: none;
+    }
+    #screenshot-selection-rect {
+      position: fixed;
+      border: 2px solid #60a5fa;
+      background: rgba(96, 165, 250, 0.12);
+      box-shadow: 0 0 0 99999px rgba(0, 0, 0, 0.18);
+      pointer-events: none;
+      display: none;
+    }
+    #screenshot-selection-hint {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(18, 18, 18, 0.92);
+      color: #f1f5f9;
+      padding: 9px 14px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 8px;
+      font: 600 12px 'Inter', 'Plus Jakarta Sans', sans-serif;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .screenshot-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 10px;
+    }
+
+    .control-btn.delete {
+      background: #ef4444;
+      color: white;
+      border: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .toast {
+      position: absolute;
+      bottom: 25px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(16, 185, 129, 0.95);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 2000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .toast.show { opacity: 1; }
+
+    .settings-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1100;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(18, 18, 18, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .settings-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+      transform: scale(1.05);
+    }
+    .settings-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #e2e8f0;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.4s ease;
+    }
+    .settings-btn.active svg {
+      transform: rotate(90deg);
+      stroke: #38bdf8;
+    }
+
+    .range-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.2);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .range-value {
+      color: #38bdf8;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 36px;
+      text-align: right;
+    }
+
+    .text-input, .select-input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 5px;
+      padding: 6px 8px;
+      color: #e2e8f0;
+      font-size: 11px;
+      font-family: inherit;
+      font-weight: 600;
+      width: 100%;
+      outline: none;
+    }
+    .text-input:focus, .select-input:focus {
+      border-color: #38bdf8;
+    }
+
+    .select-input option {
+      background: #18181b;
+      color: #e2e8f0;
+    }
+
+    .color-input {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 32px;
+      height: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+    }
+    .color-input::-webkit-color-swatch-wrapper { padding: 2px; }
+    .color-input::-webkit-color-swatch { border: none; border-radius: 3px; }
+
+    #watermark-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 500;
+      overflow: hidden;
+    }
+
+    .watermark-tile {
+      position: absolute;
+      font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      white-space: nowrap;
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    }
+
+    .settings-menu {
+      position: fixed; top: 58px; right: 12px; width: min(370px, calc(100vw - 24px));
+      min-width: 0; max-height: calc(100dvh - 74px); padding: 0; gap: 0;
+      overflow: hidden; background: #17191d; border: 1px solid #343840; border-radius: 13px;
+      box-shadow: 0 18px 55px rgba(0,0,0,.48); backdrop-filter: blur(16px);
+      display: none;
+      flex-direction: column;
+      z-index: 1099;
+    }
+    .settings-menu.open { display: flex; }
+    .settings-menu-body { overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 10px; display:flex; flex-direction:column; gap:8px; }
+    .settings-menu-body::-webkit-scrollbar { display: none; width: 0; height: 0; }
+    .settings-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 15px; border-bottom:1px solid #30343b; background:#1c1f24; }
+    .settings-header h2 { margin:0; color:#f1f3f5; font-size:14px; line-height:1.3; font-weight:800; letter-spacing:.1px; }
+    .settings-header p { margin:3px 0 0; color:#9299a4; font-size:10px; font-weight:500; }
+    .settings-close { display:grid; place-items:center; width:29px; height:29px; flex:0 0 auto; color:#cbd0d8; background:#292d34; border:1px solid #3a3f48; border-radius:7px; cursor:pointer; }
+    .settings-close:hover { background:#343943; color:#fff; }
+    .settings-close svg { width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round; }
+    .settings-group { gap:8px; padding:11px; background:#1d2025; border:1px solid #30343b; border-radius:9px; }
+    .settings-group-title { color:#c4cbd5; font-size:10px; letter-spacing:.55px; margin:0 0 2px; }
+    .settings-row { min-height:27px; gap:12px; display: flex; align-items: center; justify-content: space-between; }
+    .settings-row-vertical { display: flex; flex-direction: column; gap: 6px; }
+    .settings-label { color:#e0e4e9; font-size:11px; font-weight:600; }
+    .settings-label small { color:#929aa6; font-size:9px; line-height:1.4; display: block; margin-top: 1px; }
+    .toggle { position: relative; width: 32px; height: 18px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle .slider { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.15); border-radius: 20px; cursor: pointer; transition: background 0.25s ease; }
+    .toggle .slider::before { content: ""; position: absolute; height: 12px; width: 12px; left: 3px; bottom: 3px; background: #e2e8f0; border-radius: 50%; transition: transform 0.25s ease, background 0.25s ease; }
+    .toggle input:checked + .slider { background: #667b91; }
+    .toggle input:checked + .slider::before { transform: translateX(14px); background: #ffffff; }
+    .range-slider::-webkit-slider-thumb { background:#b6c0cc; }
+    .range-value { color:#d4dae2; font-variant-numeric:tabular-nums; }
+    .text-input,.select-input { background:#141619; border-color:#3a3f47; border-radius:6px; }
+    .text-input:focus,.select-input:focus { border-color:#8997a8; }
+    .settings-menu button:not(.settings-close) { border-radius:6px !important; }
+    @media (max-width:600px) {
+      .settings-menu { top:56px; right:8px; width:calc(100vw - 16px); max-height:calc(100dvh - 66px); }
+      .settings-menu-body { padding:8px; gap:7px; }
+      .settings-group { padding:10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="watermark-layer"></div>
+<div id="drop-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(37,99,235,0.18);border:4px dashed #60a5fa;pointer-events:none;align-items:center;justify-content:center;">
+  <div style="background:rgba(18,18,18,0.95);color:#f1f5f9;padding:24px 36px;border-radius:14px;font-size:18px;font-weight:800;font-family:'Inter','Plus Jakarta Sans',sans-serif;border:2px solid #60a5fa;">
+    Відпустіть файл налаштувань
+  </div>
+</div>
+
+<div class="datetime-panel" id="datetime-panel">
+  <div class="datetime-text" id="datetime-text-view">Станом на 22.10.2026 17:24</div>
+</div>
+
+<button class="settings-btn" id="settings-btn" title="Налаштування">
+  <svg viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+</button>
+
+<div class="settings-menu" id="settings-menu" role="dialog" aria-label="Налаштування карти">
+  <div class="settings-header">
+    <div><h2>Налаштування карти</h2><p>Вигляд, об’єкти та підписи</p></div>
+    <button class="settings-close" id="settings-close" type="button" aria-label="Закрити налаштування"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="settings-menu-body">
+  <div class="settings-group">
+    <div class="settings-group-title">Полігони DeepState</div>
+    <div class="settings-row">
+      <div class="settings-label">Окуповано після 2022</div>
+      <label class="toggle">
+        <input type="checkbox" id="ds-occupied-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="settings-row-vertical">
+      <div class="settings-label">Прозорість (Окуповано)</div>
+      <div class="range-control">
+        <input type="range" id="ds-occupied-opacity" class="range-slider" min="0" max="100" value="40">
+        <span class="range-value" id="ds-occupied-opacity-val">40%</span>
+      </div>
+    </div>
+
+    <div class="settings-row" style="margin-top: 8px;">
+      <div class="settings-label">Сіра зона (Невідомо)</div>
+      <label class="toggle">
+        <input type="checkbox" id="ds-unknown-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="settings-row-vertical">
+      <div class="settings-label">Прозорість (Сіра зона)</div>
+      <div class="range-control">
+        <input type="range" id="ds-unknown-opacity" class="range-slider" min="0" max="100" value="60">
+        <span class="range-value" id="ds-unknown-opacity-val">60%</span>
+      </div>
+    </div>
+
+    <div class="settings-row" style="margin-top: 8px;">
+      <div class="settings-label">Крим / ОРДЛО</div>
+      <label class="toggle">
+        <input type="checkbox" id="ds-crimea-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="settings-row-vertical">
+      <div class="settings-label">Прозорість (Крим/ОРДЛО)</div>
+      <div class="range-control">
+        <input type="range" id="ds-crimea-opacity" class="range-slider" min="0" max="100" value="40">
+        <span class="range-value" id="ds-crimea-opacity-val">40%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-title">Затемнення за межами України</div>
+    <div class="settings-row">
+      <div class="settings-label">Маска території</div>
+      <input type="color" id="mask-color" class="color-input" value="#888888">
+    </div>
+    <div class="settings-row-vertical">
+      <div class="settings-label">Прозорість</div>
+      <div class="range-control">
+        <input type="range" id="mask-opacity-slider" class="range-slider" min="0" max="100" value="100">
+        <span class="range-value" id="mask-opacity-value">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-title">БПЛА та громади</div>
+
+    <div class="settings-row">
+      <div class="settings-label">Підсвічування громад
+        <small>Якщо БПЛА у громаді — вона підсвічується</small>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="gromady-highlight-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Колір підсвітки</div>
+      <input type="color" id="gromady-fill-color" class="color-input" value="#dd2129">
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Прозорість підсвітки</div>
+      <div class="range-control">
+        <input type="range" id="gromady-fill-opacity" class="range-slider" min="0" max="100" value="18">
+        <span class="range-value" id="gromady-fill-opacity-val">18%</span>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Напрямок БПЛА
+        <small>Кружок зі стрілкою напрямку</small>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="drone-direction-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Підписи над БПЛА
+        <small>Назва у білому бабблі над іконкою</small>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="drone-labels-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Коло 1км для БПЛА
+        <small>Коло діаметром 1км навколо дронів</small>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="drone-500m-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row" style="margin-top:6px;">
+      <div class="settings-label">Коло під ціллю
+        <small>Прозоре коло з обводкою під іконкою</small>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="target-circle-enabled">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div id="target-circle-options" style="display:none;flex-direction:column;gap:6px;margin-top:2px;">
+      <div class="settings-row">
+        <div class="settings-label">Колір обводки</div>
+        <input type="color" id="target-circle-color" class="color-input" value="#ff0000">
+      </div>
+      <div class="settings-row-vertical">
+        <div class="settings-label">Товщина обводки</div>
+        <div class="range-control">
+          <input type="range" id="target-circle-width" class="range-slider" min="0.5" max="12" value="2" step="0.1">
+          <span class="range-value" id="target-circle-width-val">2.0px</span>
+        </div>
+      </div>
+      <div class="settings-row-vertical">
+        <div class="settings-label">Розмір (% від іконки)</div>
+        <div class="range-control">
+          <input type="range" id="target-circle-size" class="range-slider" min="50" max="120" value="85">
+          <span class="range-value" id="target-circle-size-val">85%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-title">Дисклеймер</div>
+    <div class="settings-row">
+      <div class="settings-label">Показати дисклеймер</div>
+      <label class="toggle">
+        <input type="checkbox" id="disclaimer-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Показати іконки БПЛА</div>
+      <label class="toggle">
+        <input type="checkbox" id="disclaimer-show-icons" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Текст дисклеймера</div>
+      <textarea id="disclaimer-text-input" class="text-input" rows="3" style="resize: vertical; min-height: 50px;">Мапа не є військовою. Усі дані взяті з відкритих телеграм-каналів і можуть бути неточними.</textarea>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Колір фону</div>
+      <input type="color" id="disclaimer-bg-color" class="color-input" value="#ffffff">
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Колір тексту</div>
+      <input type="color" id="disclaimer-text-color" class="color-input" value="#1a1a1a">
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Колір обводки</div>
+      <input type="color" id="disclaimer-border-color" class="color-input" value="#000000">
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Товщина обводки</div>
+      <div class="range-control">
+        <input type="range" id="disclaimer-border-width" class="range-slider" min="0" max="8" value="2" step="0.5">
+        <span class="range-value" id="disclaimer-border-width-val">2px</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Заокруглення кутів</div>
+      <div class="range-control">
+        <input type="range" id="disclaimer-border-radius" class="range-slider" min="0" max="30" value="8">
+        <span class="range-value" id="disclaimer-border-radius-val">8px</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Прозорість</div>
+      <div class="range-control">
+        <input type="range" id="disclaimer-opacity-slider" class="range-slider" min="10" max="100" value="95">
+        <span class="range-value" id="disclaimer-opacity-value">95%</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Позиція по горизонталі</div>
+      <select id="disclaimer-pos-h" class="select-input">
+        <option value="left" selected>Ліво</option>
+        <option value="center">Центр</option>
+        <option value="right">Право</option>
+      </select>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Позиція по вертикалі</div>
+      <select id="disclaimer-pos-v" class="select-input">
+        <option value="top">Верх</option>
+        <option value="bottom" selected>Низ</option>
+      </select>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Ширина дисклеймера (px)</div>
+      <div class="range-control">
+        <input type="range" id="disclaimer-width" class="range-slider" min="160" max="500" value="280" step="10">
+        <span class="range-value" id="disclaimer-width-val">280px</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Відступ (між іконками та текстом)</div>
+      <div class="range-control">
+        <input type="range" id="disclaimer-spacing" class="range-slider" min="2" max="30" value="10" step="1">
+        <span class="range-value" id="disclaimer-spacing-val">10px</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Розмір тексту дисклеймера (px)</div>
+      <div class="range-control">
+        <input type="range" id="disclaimer-font-size" class="range-slider" min="8" max="20" value="11" step="1">
+        <span class="range-value" id="disclaimer-font-size-val">11px</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Товщина тексту дисклеймера</div>
+      <select id="disclaimer-font-weight" class="select-input">
+        <option value="400">Звичайний (400)</option>
+        <option value="500">Середній (500)</option>
+        <option value="600">Напівжирний (600)</option>
+        <option value="700" selected>Жирний (700)</option>
+        <option value="800">Дуже жирний (800)</option>
+      </select>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Розмір підпису іконок БПЛА (px)</div>
+      <div class="range-control">
+        <input type="range" id="disclaimer-label-font-size" class="range-slider" min="7" max="18" value="12" step="1">
+        <span class="range-value" id="disclaimer-label-font-size-val">12px</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Товщина підпису іконок БПЛА</div>
+      <select id="disclaimer-label-font-weight" class="select-input">
+        <option value="400">Звичайний (400)</option>
+        <option value="500">Середній (500)</option>
+        <option value="600">Напівжирний (600)</option>
+        <option value="700">Жирний (700)</option>
+        <option value="800" selected>Дуже жирний (800)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-title">Час / "Станом на"</div>
+    <div class="settings-row">
+      <div class="settings-label">Показати час</div>
+      <label class="toggle">
+        <input type="checkbox" id="datetime-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="settings-row">
+      <div class="settings-label">Авто-оновлення часу
+        <small>Поточні реальні дані на хвилинній основі</small>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="datetime-auto-enabled" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="settings-row-vertical">
+      <div class="settings-label">Власний текст (якщо вимкнено авто)</div>
+      <input type="text" id="datetime-text-input" class="text-input" value="Станом на 22.10.2026 17:24">
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Колір фону</div>
+      <input type="color" id="datetime-bg-color" class="color-input" value="#ffffff">
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Колір тексту</div>
+      <input type="color" id="datetime-text-color-input" class="color-input" value="#1a1a1a">
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Колір обводки</div>
+      <input type="color" id="datetime-border-color" class="color-input" value="#000000">
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Товщина обводки</div>
+      <div class="range-control">
+        <input type="range" id="datetime-border-width" class="range-slider" min="0" max="8" value="2" step="0.5">
+        <span class="range-value" id="datetime-border-width-val">2px</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Заокруглення кутів</div>
+      <div class="range-control">
+        <input type="range" id="datetime-border-radius" class="range-slider" min="0" max="30" value="8">
+        <span class="range-value" id="datetime-border-radius-val">8px</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Прозорість</div>
+      <div class="range-control">
+        <input type="range" id="datetime-opacity-slider" class="range-slider" min="10" max="100" value="95">
+        <span class="range-value" id="datetime-opacity-value">95%</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Позиція по горизонталі</div>
+      <select id="datetime-pos-h" class="select-input">
+        <option value="left" selected>Ліво</option>
+        <option value="center">Центр</option>
+        <option value="right">Право</option>
+      </select>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Позиція по вертикалі</div>
+      <select id="datetime-pos-v" class="select-input">
+        <option value="top" selected>Верх</option>
+        <option value="bottom">Низ</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-title">Водяний знак</div>
+    <div class="settings-row">
+      <div class="settings-label">Показати</div>
+      <label class="toggle">
+        <input type="checkbox" id="watermark-enabled">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Текст</div>
+      <input type="text" id="watermark-text" class="text-input" value="ШОСТКА • ОГЛЯД" maxlength="40">
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-label">Колір</div>
+      <input type="color" id="watermark-color" class="color-input" value="#ffffff">
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Прозорість</div>
+      <div class="range-control">
+        <input type="range" id="watermark-opacity-slider" class="range-slider" min="1" max="100" value="12">
+        <span class="range-value" id="watermark-opacity-value">12%</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Розмір</div>
+      <div class="range-control">
+        <input type="range" id="watermark-size-slider" class="range-slider" min="10" max="80" value="28">
+        <span class="range-value" id="watermark-size-value">28px</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Щільність (кількість)</div>
+      <div class="range-control">
+        <input type="range" id="watermark-density-slider" class="range-slider" min="1" max="30" value="8">
+        <span class="range-value" id="watermark-density-value">8</span>
+      </div>
+    </div>
+
+    <div class="settings-row-vertical">
+      <div class="settings-label">Кут повороту</div>
+      <div class="range-control">
+        <input type="range" id="watermark-angle-slider" class="range-slider" min="-90" max="90" value="-30">
+        <span class="range-value" id="watermark-angle-value">-30°</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-title">Файл налаштувань</div>
+    <div class="settings-label" style="color:#94a3b8;font-size:10px;line-height:1.4;">Збережіть усі налаштування у .txt файл, або перетягніть раніше збережений файл у вікно браузера щоб відновити.</div>
+    <button id="export-settings-btn" style="background:#2563eb;color:white;border:none;border-radius:6px;padding:8px 10px;font-size:11px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;">Завантажити settings.txt</button>
+  </div>
+  </div>
+</div>
+
+<div class="controls-panel" id="ui-panel">
+  <div class="panel-section">
+    <div class="panel-title">Додати об'єкт</div>
+    <div class="icons-grid">
+      <button class="icon-btn" onclick="addIconMarker('gerbera.png', 'Гербера')">
+        <img src="icons/gerbera.png" alt="Гербера"> Гербера
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('bp.png', 'Ударний Бп')">
+        <img src="icons/bp.png" alt="Ударний Бп"> Ударний Бп
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('banderola.png', 'Бандероль')">
+        <img src="icons/banderola.png" alt="Бандероль"> Бандероль
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('kab.png', 'КАБ')">
+        <img src="icons/kab.png" alt="КАБ"> КАБ
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('orlan.png', 'Розвідник')">
+        <img src="icons/orlan.png" alt="Розвідник"> Розвідник
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('avia.png', 'Т/А')">
+        <img src="icons/avia.png" alt="Т/А"> Т/А
+      </button>
+
+      <button class="icon-btn" onclick="addIconMarker('зала.png', 'Зала')">
+        <img src="icons/зала.png" alt="Зала"> Зала
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('італмас.png', 'Італмас')">
+        <img src="icons/італмас.png" alt="Італмас"> Італмас
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('ланцет.png', 'Ланцет')">
+        <img src="icons/ланцет.png" alt="Ланцет"> Ланцет
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('молнія.png', 'Молнія')">
+        <img src="icons/молнія.png" alt="Молнія"> Молнія
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('невідомий.png', 'Невідомий')">
+        <img src="icons/невідомий.png" alt="Невідомий"> Невідомий
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('реактивний.png', 'Реактивний')">
+        <img src="icons/реактивний.png" alt="Реактивний"> Реактивний
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('розвіддрон.png', 'Розвіддрон')">
+        <img src="icons/розвіддрон.png" alt="Розвіддрон"> Розвіддрон
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('скам.png', 'Скам')">
+        <img src="icons/скам.png" alt="Скам"> Скам
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('фпв.png', 'ФПВ')">
+        <img src="icons/фпв.png" alt="ФПВ"> ФПВ
+      </button>
+      <button class="icon-btn" onclick="addIconMarker('шахед.png', 'Шахед')">
+        <img src="icons/шахед.png" alt="Шахед"> Шахед
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-section">
+    <div class="panel-title">Активні об'єкти (<span id="objects-count">0</span>)</div>
+    
+    <div class="batch-actions">
+      <button class="btn-secondary" onclick="selectAllObjects(true)">Вибрати всі</button>
+      <button class="btn-secondary" onclick="selectAllObjects(false)">Зняти вибір</button>
+      <button class="btn-secondary" onclick="generateCoursesReport()">курси</button>
+      <button class="btn-danger" onclick="deleteSelectedObjects()">Видалити</button>
+    </div>
+
+    <div class="objects-list-wrapper" id="objects-list">
+      <div class="empty-msg">Немає активних об'єктів на карті</div>
+    </div>
+  </div>
+
+  <button class="screenshot-btn" onclick="takeScreenshot()">
+    Зробити скриншот
+  </button>
+</div>
+
+<div class="legend-panel" id="legend-panel">
+  <div class="disclaimer-text" id="disclaimer-text-view">Мапа не є військовою. Усі дані взяті з відкритих телеграм-каналів і можуть бути неточними.</div>
+  <div class="legend-items" id="legend-items-view"></div>
+</div>
+
+<div id="toast" class="toast">Скриншот скопійовано в буфер обміну!</div>
+
+<script>
+  const SHOSTKA_CENTER = [33.56587, 51.87999];
+  const TARGET_ZOOM = 8.3;
+
+  const STORAGE_KEY = 'shostka_map_settings_v12';
+
+  let activeFeatures = [];
+  let activeTrajectories = [];
+  let markerCounters = {};
+  let loadedImages = new Set();
+  let draggedFeatureId = null;
+  let hoveredDroneId = null;
+
+  let touchActiveDroneId = null;
+  let initialTouchAngle = 0;
+  let initialDroneRotation = 0;
+
+  let gromadyData = null;
+  let kursDataCache = null;
+  let regionsDataCache = null;
+
+  const ICON_AUTO_COLORS = {
+    'gerbera.png': '#ef4444',
+    'гербера.png': '#ef4444',
+    'bp.png': '#ef4444',
+    'banderola.png': '#f97316',
+    'kab.png': '#eab308',
+    'orlan.png': '#94a3b8',
+    'avia.png': '#eab308',
+    'шахед.png': '#ef4444',
+    'зала.png': '#94a3b8',
+    'італмас.png': '#eab308',
+    'ланцет.png': '#ef4444',
+    'молнія.png': '#eab308',
+    'невідомий.png': '#94a3b8',
+    'реактивний.png': '#f97316',
+    'розвіддрон.png': '#94a3b8',
+    'скам.png': '#eab308',
+    'фпв.png': '#ef4444'
+  };
+
+  const RECON_ICONS = new Set(['розвіддрон.png', 'orlan.png']);
+  const BIG_CIRCLE_ICONS = new Set(['скам.png', 'зала.png']);
+  const DRONE_HIGHLIGHT_RADIUS_KM = 0.5;
+
+  let settingsGromadyHighlight = true;
+  let settingsDroneDirection = true;
+  let settingsDroneLabels = true;
+  let settingsDrone500m = true;
+  let settingsTargetCircle = false;
+  let settingsTargetCircleColor = '#ff0000';
+  let settingsTargetCircleWidth = 2;
+  let settingsTargetCircleSize = 85;
+
+  const gromadyHighlightEnabled = document.getElementById('gromady-highlight-enabled');
+  const gromadyFillColor = document.getElementById('gromady-fill-color');
+  const gromadyFillOpacity = document.getElementById('gromady-fill-opacity');
+  const gromadyFillOpacityVal = document.getElementById('gromady-fill-opacity-val');
+
+  const maskColorInput = document.getElementById('mask-color');
+  const maskOpacitySlider = document.getElementById('mask-opacity-slider');
+  const maskOpacityValue = document.getElementById('mask-opacity-value');
+
+  const disclaimerEnabled = document.getElementById('disclaimer-enabled');
+  const disclaimerTextInput = document.getElementById('disclaimer-text-input');
+  const disclaimerOpacitySlider = document.getElementById('disclaimer-opacity-slider');
+  const disclaimerOpacityValue = document.getElementById('disclaimer-opacity-value');
+  const legendPanel = document.getElementById('legend-panel');
+  const disclaimerTextView = document.getElementById('disclaimer-text-view');
+  const legendItemsView = document.getElementById('legend-items-view');
+
+  const datetimeEnabled = document.getElementById('datetime-enabled');
+  const datetimeAutoEnabled = document.getElementById('datetime-auto-enabled');
+  const datetimeTextInput = document.getElementById('datetime-text-input');
+  const datetimePanel = document.getElementById('datetime-panel');
+  const datetimeTextView = document.getElementById('datetime-text-view');
+
+  const watermarkEnabled = document.getElementById('watermark-enabled');
+  const watermarkText = document.getElementById('watermark-text');
+  const watermarkColor = document.getElementById('watermark-color');
+  const watermarkOpacitySlider = document.getElementById('watermark-opacity-slider');
+  const watermarkOpacityValue = document.getElementById('watermark-opacity-value');
+  const watermarkSizeSlider = document.getElementById('watermark-size-slider');
+  const watermarkSizeValue = document.getElementById('watermark-size-value');
+  const watermarkDensitySlider = document.getElementById('watermark-density-slider');
+  const watermarkDensityValue = document.getElementById('watermark-density-value');
+  const watermarkAngleSlider = document.getElementById('watermark-angle-slider');
+  const watermarkAngleValue = document.getElementById('watermark-angle-value');
+
+  const dsOccupiedEnabled = document.getElementById('ds-occupied-enabled');
+  const dsOccupiedOpacity = document.getElementById('ds-occupied-opacity');
+  const dsOccupiedOpacityVal = document.getElementById('ds-occupied-opacity-val');
+
+  const dsUnknownEnabled = document.getElementById('ds-unknown-enabled');
+  const dsUnknownOpacity = document.getElementById('ds-unknown-opacity');
+  const dsUnknownOpacityVal = document.getElementById('ds-unknown-opacity-val');
+
+  const dsCrimeaEnabled = document.getElementById('ds-crimea-enabled');
+  const dsCrimeaOpacity = document.getElementById('ds-crimea-opacity');
+  const dsCrimeaOpacityVal = document.getElementById('ds-crimea-opacity-val');
+
+
+
+  const defaultSettings = {
+    gromady: {
+      enabled: true,
+      color: '#dd2129',
+      opacity: 18
+    },
+    mask: {
+      color: '#888888',
+      opacity: 100
+    },
+    disclaimer: {
+      enabled: true,
+      text: 'Мапа не є військовою. Усі дані взяті з відкритих телеграм-каналів і можуть бути неточними.',
+      opacity: 95,
+      showIcons: true,
+      bgColor: '#ffffff',
+      textColor: '#1a1a1a',
+      borderColor: '#000000',
+      borderWidth: 2,
+      borderRadius: 8,
+      posH: 'left',
+      posV: 'bottom',
+      width: 280,
+      spacing: 10,
+      fontSize: 11,
+      fontWeight: '700',
+      labelFontSize: 12,
+      labelFontWeight: '800'
+    },
+    datetime: {
+      enabled: true,
+      auto: true,
+      text: 'Станом на 22.10.2026 17:24',
+      bgColor: '#ffffff',
+      textColor: '#1a1a1a',
+      borderColor: '#000000',
+      borderWidth: 2,
+      borderRadius: 8,
+      opacity: 95,
+      posH: 'left',
+      posV: 'top'
+    },
+    watermark: {
+      enabled: false,
+      text: 'ШОСТКА • ОГЛЯД',
+      color: '#ffffff',
+      opacity: 12,
+      size: 28,
+      density: 8,
+      angle: -30
+    },
+    drone: {
+      direction: true,
+      labels: true,
+      circle500m: true,
+      targetCircle: false,
+      targetCircleColor: '#ff0000',
+      targetCircleWidth: 2,
+      targetCircleSize: 85
+    },
+    deepstate: {
+      occupiedEnabled: true,
+      occupiedOpacity: 40,
+      unknownEnabled: true,
+      unknownOpacity: 60,
+      crimeaEnabled: true,
+      crimeaOpacity: 40
+    }
+  };
+
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return JSON.parse(JSON.stringify(defaultSettings));
+      const parsed = JSON.parse(raw);
+      return {
+        ...defaultSettings,
+        ...parsed,
+        gromady: { ...defaultSettings.gromady, ...(parsed.gromady || {}) },
+        mask: { ...defaultSettings.mask, ...(parsed.mask || {}) },
+        disclaimer: { ...defaultSettings.disclaimer, ...(parsed.disclaimer || {}) },
+        datetime: { ...defaultSettings.datetime, ...(parsed.datetime || {}) },
+        watermark: { ...defaultSettings.watermark, ...(parsed.watermark || {}) },
+        drone: { ...defaultSettings.drone, ...(parsed.drone || {}) },
+        deepstate: { ...defaultSettings.deepstate, ...(parsed.deepstate || {}) }
+      };
+    } catch (e) {
+      return JSON.parse(JSON.stringify(defaultSettings));
+    }
+  }
+
+  let _saveTimer = null;
+  function scheduleSave() {
+    clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(() => saveSettings(), 300);
+  }
+
+  function saveSettings() {
+    try {
+      const settings = {
+        gromady: {
+          enabled: gromadyHighlightEnabled.checked,
+          color: gromadyFillColor.value,
+          opacity: parseInt(gromadyFillOpacity.value, 10)
+        },
+        mask: {
+          color: maskColorInput.value,
+          opacity: parseInt(maskOpacitySlider.value, 10)
+        },
+        disclaimer: {
+          enabled: disclaimerEnabled.checked,
+          text: disclaimerTextInput.value,
+          opacity: parseInt(disclaimerOpacitySlider.value, 10),
+          showIcons: document.getElementById('disclaimer-show-icons').checked,
+          bgColor: document.getElementById('disclaimer-bg-color').value,
+          textColor: document.getElementById('disclaimer-text-color').value,
+          borderColor: document.getElementById('disclaimer-border-color').value,
+          borderWidth: parseFloat(document.getElementById('disclaimer-border-width').value),
+          borderRadius: parseInt(document.getElementById('disclaimer-border-radius').value, 10),
+          posH: document.getElementById('disclaimer-pos-h').value,
+          posV: document.getElementById('disclaimer-pos-v').value,
+          width: parseInt(document.getElementById('disclaimer-width').value, 10),
+          spacing: parseInt(document.getElementById('disclaimer-spacing').value, 10),
+          fontSize: parseInt(document.getElementById('disclaimer-font-size').value, 10),
+          fontWeight: document.getElementById('disclaimer-font-weight').value,
+          labelFontSize: parseInt(document.getElementById('disclaimer-label-font-size').value, 10),
+          labelFontWeight: document.getElementById('disclaimer-label-font-weight').value
+        },
+        datetime: {
+          enabled: datetimeEnabled.checked,
+          auto: datetimeAutoEnabled.checked,
+          text: datetimeTextInput.value,
+          bgColor: document.getElementById('datetime-bg-color').value,
+          textColor: document.getElementById('datetime-text-color-input').value,
+          borderColor: document.getElementById('datetime-border-color').value,
+          borderWidth: parseFloat(document.getElementById('datetime-border-width').value),
+          borderRadius: parseInt(document.getElementById('datetime-border-radius').value, 10),
+          opacity: parseInt(document.getElementById('datetime-opacity-slider').value, 10),
+          posH: document.getElementById('datetime-pos-h').value,
+          posV: document.getElementById('datetime-pos-v').value
+        },
+        watermark: {
+          enabled: watermarkEnabled.checked,
+          text: watermarkText.value,
+          color: watermarkColor.value,
+          opacity: parseInt(watermarkOpacitySlider.value, 10),
+          size: parseInt(watermarkSizeSlider.value, 10),
+          density: parseInt(watermarkDensitySlider.value, 10),
+          angle: parseInt(watermarkAngleSlider.value, 10)
+        },
+        drone: {
+          direction: document.getElementById('drone-direction-enabled').checked,
+          labels: document.getElementById('drone-labels-enabled').checked,
+          circle500m: document.getElementById('drone-500m-enabled').checked,
+          targetCircle: document.getElementById('target-circle-enabled').checked,
+          targetCircleColor: document.getElementById('target-circle-color').value,
+          targetCircleWidth: parseFloat(document.getElementById('target-circle-width').value),
+          targetCircleSize: parseInt(document.getElementById('target-circle-size').value, 10)
+        },
+        deepstate: {
+          occupiedEnabled: dsOccupiedEnabled.checked,
+          occupiedOpacity: parseInt(dsOccupiedOpacity.value, 10),
+          unknownEnabled: dsUnknownEnabled.checked,
+          unknownOpacity: parseInt(dsUnknownOpacity.value, 10),
+          crimeaEnabled: dsCrimeaEnabled.checked,
+          crimeaOpacity: parseInt(dsCrimeaOpacity.value, 10)
+        }
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    } catch (e) {}
+  }
+
+  const savedSettings = loadSettings();
+
+  const map = new maplibregl.Map({
+    container: 'map',
+    preserveDrawingBuffer: true,
+    style: 'https://api.maptiler.com/maps/01a15d84-49c8-768b-8c27-37c84b553d7e/style.json?key=NxVg5ozWhACUzHBh2DZr',
+    center: SHOSTKA_CENTER,
+    zoom: TARGET_ZOOM
+  });
+
+  const watermarkLayer = document.getElementById('watermark-layer');
+
+  function updateDateTimeDisplay() {
+    if (!datetimeEnabled.checked) {
+      datetimePanel.style.display = 'none';
+      return;
+    }
+    datetimePanel.style.display = 'flex';
+
+    const dts = getDatetimeStyle();
+    datetimePanel.style.background = dts.bgColor;
+    datetimePanel.style.border = `${dts.borderWidth}px solid ${dts.borderColor}`;
+    datetimePanel.style.borderRadius = dts.borderRadius + 'px';
+    datetimePanel.style.opacity = dts.opacity.toString();
+    datetimeTextView.style.color = dts.textColor;
+
+    applyPanelPosition(datetimePanel, dts.posH, dts.posV);
+
+    if (datetimeAutoEnabled.checked) {
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const yyyy = now.getFullYear();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      const formatted = `Станом на ${dd}.${mm}.${yyyy} ${hh}:${min}`;
+      datetimeTextView.textContent = formatted;
+      datetimeTextInput.value = formatted;
+    } else {
+      datetimeTextView.textContent = datetimeTextInput.value;
+    }
+  }
+
+  setInterval(() => {
+    if (datetimeEnabled.checked && datetimeAutoEnabled.checked) {
+      updateDateTimeDisplay();
+    }
+  }, 10000);
+
+  function getDisclaimerStyle() {
+    return {
+      bgColor: document.getElementById('disclaimer-bg-color').value || '#ffffff',
+      textColor: document.getElementById('disclaimer-text-color').value || '#1a1a1a',
+      borderColor: document.getElementById('disclaimer-border-color').value || '#000000',
+      borderWidth: parseFloat(document.getElementById('disclaimer-border-width').value) || 2,
+      borderRadius: parseInt(document.getElementById('disclaimer-border-radius').value, 10),
+      opacity: parseInt(disclaimerOpacitySlider.value, 10) / 100,
+      showIcons: document.getElementById('disclaimer-show-icons').checked,
+      posH: document.getElementById('disclaimer-pos-h').value || 'left',
+      posV: document.getElementById('disclaimer-pos-v').value || 'bottom',
+      width: parseInt(document.getElementById('disclaimer-width').value, 10) || 280,
+      spacing: parseInt(document.getElementById('disclaimer-spacing').value, 10) || 10,
+      fontSize: parseInt(document.getElementById('disclaimer-font-size').value, 10) || 11,
+      fontWeight: document.getElementById('disclaimer-font-weight').value || '700',
+      labelFontSize: parseInt(document.getElementById('disclaimer-label-font-size').value, 10) || 12,
+      labelFontWeight: document.getElementById('disclaimer-label-font-weight').value || '800'
+    };
+  }
+
+  function getDatetimeStyle() {
+    return {
+      bgColor: document.getElementById('datetime-bg-color').value || '#ffffff',
+      textColor: document.getElementById('datetime-text-color-input').value || '#1a1a1a',
+      borderColor: document.getElementById('datetime-border-color').value || '#000000',
+      borderWidth: parseFloat(document.getElementById('datetime-border-width').value) || 2,
+      borderRadius: parseInt(document.getElementById('datetime-border-radius').value, 10),
+      opacity: parseInt(document.getElementById('datetime-opacity-slider').value, 10) / 100,
+      posH: document.getElementById('datetime-pos-h').value || 'left',
+      posV: document.getElementById('datetime-pos-v').value || 'top'
+    };
+  }
+
+  function applyPanelPosition(el, posH, posV) {
+    // Reset all
+    el.style.left = '';
+    el.style.right = '';
+    el.style.bottom = '';
+    el.style.top = '';
+    el.style.transform = '';
+
+    const MARGIN = '15px';
+    if (posH === 'left') {
+      el.style.left = MARGIN;
+    } else if (posH === 'right') {
+      el.style.right = MARGIN;
+    } else {
+      el.style.left = '50%';
+      el.style.transform = posV === 'top' ? 'translateX(-50%)' : 'translateX(-50%)';
+    }
+
+    if (posV === 'top') {
+      el.style.top = MARGIN;
+    } else {
+      el.style.bottom = MARGIN;
+    }
+  }
+
+  function renderDisclaimerPanel(featuresInBox = null) {
+    const enabled = disclaimerEnabled.checked;
+    if (!enabled) {
+      legendPanel.style.display = 'none';
+      return;
+    }
+    const ds = getDisclaimerStyle();
+    legendPanel.style.display = 'flex';
+    legendPanel.style.opacity = ds.opacity.toString();
+    legendPanel.style.background = ds.bgColor;
+    legendPanel.style.border = `${ds.borderWidth}px solid ${ds.borderColor}`;
+    legendPanel.style.borderRadius = ds.borderRadius + 'px';
+    legendPanel.style.width = ds.width + 'px';
+    legendPanel.style.maxWidth = ds.width + 'px';
+
+    disclaimerTextView.style.color = ds.textColor;
+    disclaimerTextView.style.fontSize = ds.fontSize + 'px';
+    disclaimerTextView.style.fontWeight = ds.fontWeight;
+    disclaimerTextView.textContent = disclaimerTextInput.value;
+
+    // Apply gap/spacing to legend-items
+    legendItemsView.style.gap = `${Math.max(2, ds.spacing / 2)}px ${ds.spacing}px`;
+
+    applyPanelPosition(legendPanel, ds.posH, ds.posV);
+
+    const sourceList = featuresInBox !== null ? featuresInBox : activeFeatures;
+    const uniqueTypes = new Map();
+    sourceList.forEach(f => {
+      const typeName = f.properties.typeName || f.properties.title.replace(/\s+\d+$/, '');
+      const fileName = f.properties.fileName;
+      if (!uniqueTypes.has(typeName)) uniqueTypes.set(typeName, fileName);
+    });
+
+    legendItemsView.innerHTML = '';
+    if (!ds.showIcons || uniqueTypes.size === 0) {
+      legendItemsView.style.display = 'none';
+    } else {
+      legendItemsView.style.display = 'flex';
+      uniqueTypes.forEach((fileName, typeName) => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.style.gap = Math.max(2, Math.round(ds.spacing * 0.4)) + 'px';
+        item.style.fontSize = ds.labelFontSize + 'px';
+        item.style.fontWeight = ds.labelFontWeight;
+
+        // If target circle enabled, wrap icon in canvas with circle
+        if (settingsTargetCircle) {
+          const iconSize = 17;
+          const canvas = document.createElement('canvas');
+          const pad = Math.ceil(settingsTargetCircleWidth) + 2;
+          canvas.width = iconSize + pad * 2;
+          canvas.height = iconSize + pad * 2;
+          canvas.style.width = canvas.width + 'px';
+          canvas.style.height = canvas.height + 'px';
+          canvas.style.flexShrink = '0';
+          const ctx = canvas.getContext('2d');
+
+          const cx = canvas.width / 2;
+          const cy = canvas.height / 2;
+          const r = (iconSize / 2) * (settingsTargetCircleSize / 100);
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.strokeStyle = settingsTargetCircleColor;
+          ctx.lineWidth = settingsTargetCircleWidth;
+          ctx.stroke();
+
+          const img = new Image();
+          img.src = `icons/${fileName}`;
+          img.onload = () => {
+            ctx.drawImage(img, pad, pad, iconSize, iconSize);
+          };
+          if (document.querySelector(`img[src="icons/${fileName}"]`)?.complete) {
+            ctx.drawImage(document.querySelector(`img[src="icons/${fileName}"]`), pad, pad, iconSize, iconSize);
+          }
+
+          item.appendChild(canvas);
+          const span = document.createElement('span');
+          span.textContent = typeName;
+          span.style.color = ds.textColor;
+          item.appendChild(span);
+        } else {
+          const img = document.createElement('img');
+          img.src = `icons/${fileName}`;
+          img.alt = typeName;
+          img.style.width = '17px';
+          img.style.height = '17px';
+          img.style.objectFit = 'contain';
+          img.style.flexShrink = '0';
+          const span = document.createElement('span');
+          span.textContent = typeName;
+          span.style.color = ds.textColor;
+          item.appendChild(img);
+          item.appendChild(span);
+        }
+        legendItemsView.appendChild(item);
+      });
+    }
+  }
+
+  function renderWatermark() {
+    watermarkLayer.innerHTML = '';
+    
+    const enabled = watermarkEnabled.checked;
+    if (!enabled) {
+      watermarkLayer.style.display = 'none';
+      return;
+    }
+    watermarkLayer.style.display = 'block';
+
+    const text = watermarkText.value.trim() || 'ШОСТКА • ОГЛЯД';
+    const color = watermarkColor.value;
+    const opacity = parseInt(watermarkOpacitySlider.value, 10) / 100;
+    const fontSize = parseInt(watermarkSizeSlider.value, 10);
+    const density = parseInt(watermarkDensitySlider.value, 10);
+    const angle = parseInt(watermarkAngleSlider.value, 10);
+
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    
+    const cols = Math.max(1, Math.round(Math.sqrt(density * screenW / screenH)));
+    const rows = Math.max(1, Math.round(density / cols));
+    
+    const cellW = screenW / cols;
+    const cellH = screenH / rows;
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const tile = document.createElement('div');
+        tile.className = 'watermark-tile';
+        tile.textContent = text;
+        tile.style.color = color;
+        tile.style.opacity = opacity;
+        tile.style.fontSize = fontSize + 'px';
+        tile.style.left = (c * cellW + cellW / 2) + 'px';
+        tile.style.top = (r * cellH + cellH / 2) + 'px';
+        tile.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+        watermarkLayer.appendChild(tile);
+      }
+    }
+  }
+
+  function syncWatermarkUI() {
+    watermarkOpacityValue.textContent = watermarkOpacitySlider.value + '%';
+    watermarkSizeValue.textContent = watermarkSizeSlider.value + 'px';
+    watermarkDensityValue.textContent = watermarkDensitySlider.value;
+    watermarkAngleValue.textContent = watermarkAngleSlider.value + '°';
+  }
+
+  function updateMaskStyle() {
+    if (!map.getLayer('ukraine-mask-layer')) return;
+    const color = maskColorInput.value;
+    const opacity = parseInt(maskOpacitySlider.value, 10) / 100;
+    map.setPaintProperty('ukraine-mask-layer', 'fill-color', color);
+    map.setPaintProperty('ukraine-mask-layer', 'fill-opacity', opacity);
+    maskOpacityValue.textContent = maskOpacitySlider.value + '%';
+  }
+
+  function updateGromadyStyle() {
+    if (!map.getLayer('gromady-fill')) return;
+    const color = gromadyFillColor.value;
+    const opacity = parseInt(gromadyFillOpacity.value, 10) / 100;
+    
+    gromadyFillOpacityVal.textContent = gromadyFillOpacity.value + '%';
+    map.setPaintProperty('gromady-fill', 'fill-color', color);
+    map.setPaintProperty('gromady-fill', 'fill-opacity', opacity);
+  }
+
+  function updateDeepStateStyles() {
+    if (map.getLayer('occupied-layer')) {
+      map.setLayoutProperty('occupied-layer', 'visibility', dsOccupiedEnabled.checked ? 'visible' : 'none');
+      const op = parseInt(dsOccupiedOpacity.value, 10) / 100;
+      map.setPaintProperty('occupied-layer', 'fill-opacity', op);
+      dsOccupiedOpacityVal.textContent = dsOccupiedOpacity.value + '%';
+    }
+    if (map.getLayer('unknown-layer')) {
+      map.setLayoutProperty('unknown-layer', 'visibility', dsUnknownEnabled.checked ? 'visible' : 'none');
+      const op = parseInt(dsUnknownOpacity.value, 10) / 100;
+      map.setPaintProperty('unknown-layer', 'fill-opacity', op);
+      dsUnknownOpacityVal.textContent = dsUnknownOpacity.value + '%';
+    }
+    if (map.getLayer('crimea-ordlo-layer')) {
+      map.setLayoutProperty('crimea-ordlo-layer', 'visibility', dsCrimeaEnabled.checked ? 'visible' : 'none');
+      const op = parseInt(dsCrimeaOpacity.value, 10) / 100;
+      map.setPaintProperty('crimea-ordlo-layer', 'fill-opacity', op);
+      dsCrimeaOpacityVal.textContent = dsCrimeaOpacity.value + '%';
+    }
+  }
+
+  function applySettings(s) {
+    if (s.gromady) {
+      gromadyHighlightEnabled.checked = s.gromady.enabled;
+      gromadyFillColor.value = s.gromady.color || '#dd2129';
+      gromadyFillOpacity.value = s.gromady.opacity !== undefined ? s.gromady.opacity : 18;
+      settingsGromadyHighlight = gromadyHighlightEnabled.checked;
+    }
+
+    if (s.mask) {
+      maskColorInput.value = s.mask.color || '#888888';
+      maskOpacitySlider.value = s.mask.opacity !== undefined ? s.mask.opacity : 100;
+      updateMaskStyle();
+    }
+
+    disclaimerEnabled.checked = s.disclaimer.enabled;
+    disclaimerTextInput.value = s.disclaimer.text;
+    disclaimerOpacitySlider.value = s.disclaimer.opacity;
+    disclaimerOpacityValue.textContent = s.disclaimer.opacity + '%';
+    document.getElementById('disclaimer-show-icons').checked = s.disclaimer.showIcons !== false;
+    document.getElementById('disclaimer-bg-color').value = s.disclaimer.bgColor || '#ffffff';
+    document.getElementById('disclaimer-text-color').value = s.disclaimer.textColor || '#1a1a1a';
+    document.getElementById('disclaimer-border-color').value = s.disclaimer.borderColor || '#000000';
+    document.getElementById('disclaimer-border-width').value = s.disclaimer.borderWidth ?? 2;
+    document.getElementById('disclaimer-border-width-val').textContent = (s.disclaimer.borderWidth ?? 2) + 'px';
+    document.getElementById('disclaimer-border-radius').value = s.disclaimer.borderRadius ?? 8;
+    document.getElementById('disclaimer-border-radius-val').textContent = (s.disclaimer.borderRadius ?? 8) + 'px';
+    document.getElementById('disclaimer-pos-h').value = s.disclaimer.posH || 'left';
+    document.getElementById('disclaimer-pos-v').value = s.disclaimer.posV || 'bottom';
+    document.getElementById('disclaimer-width').value = s.disclaimer.width ?? 280;
+    document.getElementById('disclaimer-width-val').textContent = (s.disclaimer.width ?? 280) + 'px';
+    document.getElementById('disclaimer-spacing').value = s.disclaimer.spacing ?? 10;
+    document.getElementById('disclaimer-spacing-val').textContent = (s.disclaimer.spacing ?? 10) + 'px';
+    document.getElementById('disclaimer-font-size').value = s.disclaimer.fontSize ?? 11;
+    document.getElementById('disclaimer-font-size-val').textContent = (s.disclaimer.fontSize ?? 11) + 'px';
+    document.getElementById('disclaimer-font-weight').value = s.disclaimer.fontWeight ?? '700';
+    document.getElementById('disclaimer-label-font-size').value = s.disclaimer.labelFontSize ?? 12;
+    document.getElementById('disclaimer-label-font-size-val').textContent = (s.disclaimer.labelFontSize ?? 12) + 'px';
+    document.getElementById('disclaimer-label-font-weight').value = s.disclaimer.labelFontWeight ?? '800';
+    renderDisclaimerPanel();
+
+    if (s.datetime) {
+      datetimeEnabled.checked = s.datetime.enabled !== false;
+      datetimeAutoEnabled.checked = s.datetime.auto !== false;
+      datetimeTextInput.value = s.datetime.text || 'Станом на 22.10.2026 17:24';
+      document.getElementById('datetime-bg-color').value = s.datetime.bgColor || '#ffffff';
+      document.getElementById('datetime-text-color-input').value = s.datetime.textColor || '#1a1a1a';
+      document.getElementById('datetime-border-color').value = s.datetime.borderColor || '#000000';
+      document.getElementById('datetime-border-width').value = s.datetime.borderWidth ?? 2;
+      document.getElementById('datetime-border-width-val').textContent = (s.datetime.borderWidth ?? 2) + 'px';
+      document.getElementById('datetime-border-radius').value = s.datetime.borderRadius ?? 8;
+      document.getElementById('datetime-border-radius-val').textContent = (s.datetime.borderRadius ?? 8) + 'px';
+      document.getElementById('datetime-opacity-slider').value = s.datetime.opacity ?? 95;
+      document.getElementById('datetime-opacity-value').textContent = (s.datetime.opacity ?? 95) + '%';
+      document.getElementById('datetime-pos-h').value = s.datetime.posH || 'left';
+      document.getElementById('datetime-pos-v').value = s.datetime.posV || 'top';
+    }
+    updateDateTimeDisplay();
+
+    watermarkEnabled.checked = s.watermark.enabled;
+    watermarkText.value = s.watermark.text;
+    watermarkColor.value = s.watermark.color;
+    watermarkOpacitySlider.value = s.watermark.opacity;
+    watermarkSizeSlider.value = s.watermark.size;
+    watermarkDensitySlider.value = s.watermark.density;
+    watermarkAngleSlider.value = s.watermark.angle;
+    
+    syncWatermarkUI();
+    renderWatermark();
+
+    if (s.drone) {
+      document.getElementById('drone-direction-enabled').checked = s.drone.direction !== false;
+      document.getElementById('drone-labels-enabled').checked = s.drone.labels !== false;
+      document.getElementById('drone-500m-enabled').checked = s.drone.circle500m !== false;
+      settingsDroneDirection = s.drone.direction !== false;
+      settingsDroneLabels = s.drone.labels !== false;
+      settingsDrone500m = s.drone.circle500m !== false;
+
+      const tcEnabled = document.getElementById('target-circle-enabled');
+      tcEnabled.checked = !!s.drone.targetCircle;
+      document.getElementById('target-circle-color').value = s.drone.targetCircleColor || '#ff0000';
+      document.getElementById('target-circle-width').value = s.drone.targetCircleWidth ?? 2;
+      document.getElementById('target-circle-size').value = s.drone.targetCircleSize ?? 85;
+      document.getElementById('target-circle-width-val').textContent = parseFloat(s.drone.targetCircleWidth ?? 2).toFixed(1) + 'px';
+      document.getElementById('target-circle-size-val').textContent = (s.drone.targetCircleSize ?? 85) + '%';
+      document.getElementById('target-circle-options').style.display = tcEnabled.checked ? 'flex' : 'none';
+      settingsTargetCircle = tcEnabled.checked;
+      settingsTargetCircleColor = s.drone.targetCircleColor || '#ff0000';
+      settingsTargetCircleWidth = s.drone.targetCircleWidth ?? 2;
+      settingsTargetCircleSize = s.drone.targetCircleSize ?? 85;
+    }
+
+    if (s.deepstate) {
+      dsOccupiedEnabled.checked = s.deepstate.occupiedEnabled !== false;
+      dsOccupiedOpacity.value = s.deepstate.occupiedOpacity ?? 40;
+      dsUnknownEnabled.checked = s.deepstate.unknownEnabled !== false;
+      dsUnknownOpacity.value = s.deepstate.unknownOpacity ?? 60;
+      dsCrimeaEnabled.checked = s.deepstate.crimeaEnabled !== false;
+      dsCrimeaOpacity.value = s.deepstate.crimeaOpacity ?? 40;
+    }
+    updateDeepStateStyles();
+  }
+
+  function pointInPolygon(point, polygon) {
+    const x = point[0], y = point[1];
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i][0], yi = polygon[i][1];
+      const xj = polygon[j][0], yj = polygon[j][1];
+      const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  function pointInFeature(point, feature) {
+    const geom = feature.geometry;
+    if (geom.type === 'Polygon') {
+      return pointInPolygon(point, geom.coordinates[0]);
+    } else if (geom.type === 'MultiPolygon') {
+      return geom.coordinates.some(poly => pointInPolygon(point, poly[0]));
+    }
+    return false;
+  }
+
+  function offsetPoint(lng, lat, radiusKm) {
+    const R = 6371;
+    const points = [];
+    for (let i = 0; i < 16; i++) {
+      const bearing = (i / 16) * 2 * Math.PI;
+      const d = radiusKm / R;
+      const lat1 = lat * Math.PI / 180;
+      const lon1 = lng * Math.PI / 180;
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(bearing));
+      const lon2 = lon1 + Math.atan2(Math.sin(bearing) * Math.sin(d) * Math.cos(lat1), Math.cos(d) - Math.sin(lat1) * Math.sin(lat2));
+      points.push([lon2 * 180 / Math.PI, lat2 * 180 / Math.PI]);
+    }
+    return points;
+  }
+
+  function circleIntersectsFeature(lng, lat, radiusKm, feature) {
+    if (pointInFeature([lng, lat], feature)) return true;
+    const perim = offsetPoint(lng, lat, radiusKm);
+    return perim.some(p => pointInFeature(p, feature));
+  }
+
+  function updateGromadyHighlight() {
+    if (!gromadyData || !map.getSource('gromady-src')) return;
+
+    if (!settingsGromadyHighlight) {
+      map.getSource('gromady-src').setData({ type: 'FeatureCollection', features: [] });
+      return;
+    }
+
+    const activeGromadyIds = new Set();
+    
+    activeFeatures.forEach(feat => {
+      const [lng, lat] = feat.geometry.coordinates;
+      const fn = feat.properties.fileName;
+      let checkRadiusKm = DRONE_HIGHLIGHT_RADIUS_KM;
+
+      gromadyData.features.forEach(gromada => {
+        const gId = gromada.properties.id || gromada.properties.ID || 
+                    gromada.properties.name || gromada.properties.NAME || 
+                    gromada.properties.hromada_name || JSON.stringify(gromada.properties).slice(0,40);
+        
+        let hits = false;
+        if (BIG_CIRCLE_ICONS.has(fn)) {
+          hits = pointInFeature([lng, lat], gromada);
+        } else {
+          hits = circleIntersectsFeature(lng, lat, checkRadiusKm, gromada);
+        }
+        if (hits) activeGromadyIds.add(gId);
+      });
+    });
+
+    const filteredFeatures = gromadyData.features.filter(gromada => {
+      const gId = gromada.properties.id || gromada.properties.ID || 
+                  gromada.properties.name || gromada.properties.NAME || 
+                  gromada.properties.hromada_name || JSON.stringify(gromada.properties).slice(0,40);
+      return activeGromadyIds.has(gId);
+    });
+
+    map.getSource('gromady-src').setData({
+      type: 'FeatureCollection',
+      features: filteredFeatures
+    });
+  }
+
+  function createInvertedMaskGeoJSON(ukraineGeojson) {
+    const worldOuter = [
+      [-180, -90],
+      [180, -90],
+      [180, 90],
+      [-180, 90],
+      [-180, -90]
+    ];
+
+    let ukraineRings = [];
+
+    ukraineGeojson.features.forEach(f => {
+      const g = f.geometry;
+      if (g.type === 'Polygon') {
+        ukraineRings.push(g.coordinates[0]);
+      } else if (g.type === 'MultiPolygon') {
+        g.coordinates.forEach(poly => {
+          ukraineRings.push(poly[0]);
+        });
+      }
+    });
+
+    return {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [worldOuter, ...ukraineRings]
+        },
+        properties: {}
+      }]
+    };
+  }
+
+  map.on('load', async () => {
+
+    try {
+      const res = await fetch('gromady.geojson');
+      gromadyData = await res.json();
+    } catch(e) { gromadyData = null; }
+
+    let ukraineGeojson = null;
+    try {
+      const res = await fetch('ukraine.geojson');
+      ukraineGeojson = await res.json();
+    } catch(e) { ukraineGeojson = null; }
+
+    try {
+      const dsResponse = await fetch('https://deepstatemap.live/api/history/last');
+      if (dsResponse.ok) {
+        const dsData = await dsResponse.json();
+        const dsGeojson = dsData.map || dsData;
+        const dsFeatures = dsGeojson.features || dsGeojson;
+
+        const occupiedFeatures = [];
+        const unknownFeatures = [];
+        const crimeaOrdloFeatures = [];
+
+        dsFeatures.forEach(feature => {
+          const props = feature.properties || {};
+          const name = (props.name || '').toLowerCase();
+          const styleUrl = (props.styleUrl || '').toLowerCase();
+          const fill = (props.fill || '').toLowerCase();
+
+          const isCrimeaOrOrdlo = name.includes('крим') || 
+                                   name.includes('крым') || 
+                                   name.includes('ордло') || 
+                                   name.includes('окупований крим');
+
+          const isUnknown = name.includes('статус невідомий') || 
+                            name.includes('unknown status') || 
+                            styleUrl.includes('bcaaa4') || 
+                            fill === '#bcaaa4';
+
+          const isOccupied = name.includes('окуповано') || 
+                             name.includes('occupied') || 
+                             styleUrl.includes('500000') || 
+                             styleUrl.includes('c85050');
+
+          if (isCrimeaOrOrdlo) {
+            crimeaOrdloFeatures.push(feature);
+          } else if (isUnknown) {
+            unknownFeatures.push(feature);
+          } else if (isOccupied) {
+            occupiedFeatures.push(feature);
+          }
+        });
+
+        map.addSource('occupied-src', { type: 'geojson', data: { type: 'FeatureCollection', features: occupiedFeatures } });
+        map.addSource('unknown-src', { type: 'geojson', data: { type: 'FeatureCollection', features: unknownFeatures } });
+        map.addSource('crimea-ordlo-src', { type: 'geojson', data: { type: 'FeatureCollection', features: crimeaOrdloFeatures } });
+
+        map.addLayer({
+          id: 'occupied-layer',
+          type: 'fill',
+          source: 'occupied-src',
+          paint: {
+            'fill-color': '#D65A5A',
+            'fill-opacity': 0.40
+          }
+        });
+
+        map.addSource('gromady-boundaries-src', {
+  type: 'geojson',
+  data: gromadyData || {
+    type: 'FeatureCollection',
+    features: []
+  }
+});
+
+map.addLayer({
+  id: 'gromady-boundaries',
+  type: 'line',
+  source: 'gromady-boundaries-src',
+  paint: {
+    'line-color': '#dd2129',
+    'line-width': 0.05,
+    'line-opacity': 0.65
+  }
+});
+
+        map.addLayer({
+          id: 'unknown-layer',
+          type: 'fill',
+          source: 'unknown-src',
+          paint: {
+            'fill-color': '#bab6b3',
+            'fill-opacity': 0.60
+          }
+        });
+
+        map.addLayer({
+          id: 'crimea-ordlo-layer',
+          type: 'fill',
+          source: 'crimea-ordlo-src',
+          paint: {
+            'fill-color': '#963C64',
+            'fill-opacity': 0.40
+          }
+        });
+      }
+    } catch (dsErr) {
+      console.warn('Не удалось загрузить данные DeepState:', dsErr);
+    }
+
+    const _allLayers = map.getStyle().layers;
+    let _firstRoadOrLabel = null;
+    for (const l of _allLayers) {
+      if (
+        l.type === 'symbol' ||
+        (l.type === 'line' && l['source-layer'] && (
+          l['source-layer'].includes('road') ||
+          l['source-layer'].includes('transportation') ||
+          l['source-layer'].includes('highway')
+        ))
+      ) {
+        _firstRoadOrLabel = l.id;
+        break;
+      }
+    }
+
+    map.addSource('ukraine-src', { type: 'geojson', data: ukraineGeojson || 'ukraine.geojson' });
+    
+    if (ukraineGeojson) {
+      const maskData = createInvertedMaskGeoJSON(ukraineGeojson);
+      map.addSource('ukraine-mask-src', { type: 'geojson', data: maskData });
+      
+      map.addLayer({
+        id: 'ukraine-mask-layer',
+        type: 'fill',
+        source: 'ukraine-mask-src',
+        paint: {
+          'fill-color': maskColorInput.value || '#888888',
+          'fill-opacity': parseInt(maskOpacitySlider.value, 10) / 100
+        }
+      });
+    }
+
+    map.addSource('rayony-src', { type: 'geojson', data: 'rayony_ukrainy.geojson' });
+    map.addSource('regions-src', { type: 'geojson', data: 'regions.geojson' });
+    map.addSource('obl-src', { type: 'geojson', data: 'obl.geojson' });
+    map.addSource('gromady-src', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] }
+    });
+
+    map.addLayer({
+      'id': 'gromady-fill',
+      'type': 'fill',
+      'source': 'gromady-src',
+      'paint': {
+        'fill-color': gromadyFillColor.value || '#dd2129',
+        'fill-opacity': (parseInt(gromadyFillOpacity.value, 10) / 100) || 0.18
+      }
+    });
+
+    map.addLayer({
+      'id': 'ukraine-border',
+      'type': 'line',
+      'source': 'ukraine-src',
+      'paint': {
+        'line-color': '#dd2129',
+        'line-width': 2.5,
+        'line-opacity': 1.0
+      }
+    });
+
+    map.addLayer({
+      'id': 'regions-border',
+      'type': 'line',
+      'source': 'regions-src',
+      'paint': {
+        'line-color': '#dd2129',
+        'line-width': 1.5,
+        'line-opacity': 0.8
+      }
+    });
+    
+    map.addLayer({
+      'id': 'obl-border',
+      'type': 'line',
+      'source': 'obl-src',
+      'paint': {
+        'line-color': '#dd2129',
+        'line-width': 1.8,
+        'line-opacity': 0.95
+      }
+    });
+
+    map.addLayer({
+      'id': 'all-districts-border',
+      'type': 'line',
+      'source': 'rayony-src',
+      'paint': {
+        'line-color': '#dd2129',
+        'line-width': 0.6,
+        'line-opacity': 0.6
+      }
+    });
+
+    map.addSource('towns-src', { type: 'geojson', data: 'towns.geojson' });
+    map.addLayer({
+      id: 'towns-layer',
+      type: 'fill',
+      source: 'towns-src',
+      paint: {
+        'fill-color': '#F8E3CE',
+        'fill-opacity': 1.0
+      }
+    }, _firstRoadOrLabel || undefined);
+
+    map.addSource('forest-src', { type: 'geojson', data: 'forest.geojson' });
+    map.addLayer({
+      id: 'forest-layer',
+      type: 'fill',
+      source: 'forest-src',
+      paint: {
+        'fill-color': '#CDE0C2',
+        'fill-opacity': 1.0
+      }
+    }, 'towns-layer');
+
+    updateGromadyStyle();
+    updateDeepStateStyles();
+
+    const trajCanvas = document.createElement('canvas');
+    trajCanvas.id = 'traj-canvas';
+    trajCanvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:5;';
+    const mapContainer = map.getCanvasContainer();
+    mapContainer.style.position = 'relative';
+    mapContainer.appendChild(trajCanvas);
+
+    function resizeTrajCanvas() {
+      const c = map.getCanvas();
+      trajCanvas.width = c.width;
+      trajCanvas.height = c.height;
+      trajCanvas.style.width = c.style.width;
+      trajCanvas.style.height = c.style.height;
+      trajCanvas.style.zIndex = '1';
+    }
+    resizeTrajCanvas();
+    map.on('resize', resizeTrajCanvas);
+
+    const droneCanvas = document.createElement('canvas');
+    droneCanvas.id = 'drone-canvas';
+    droneCanvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:6;';
+    mapContainer.appendChild(droneCanvas);
+
+    function resizeDroneCanvas() {
+      const c = map.getCanvas();
+      droneCanvas.width = c.width;
+      droneCanvas.height = c.height;
+      droneCanvas.style.width = c.style.width;
+      droneCanvas.style.height = c.style.height;
+    }
+    resizeDroneCanvas();
+    map.on('resize', resizeDroneCanvas);
+
+    const radiusCanvas = document.createElement('canvas');
+    radiusCanvas.id = 'radius-canvas';
+    radiusCanvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:1;';
+    const glCanvas = map.getCanvas();
+    mapContainer.insertBefore(radiusCanvas, glCanvas);
+
+    function resizeRadiusCanvas() {
+      const c = map.getCanvas();
+      radiusCanvas.width = c.width;
+      radiusCanvas.height = c.height;
+      radiusCanvas.style.width = c.style.width;
+      radiusCanvas.style.height = c.style.height;
+    }
+    resizeRadiusCanvas();
+    map.on('resize', resizeRadiusCanvas);
+
+    function kmToPixels(km, lat, zoom) {
+      const earthCircumference = 40075016.686;
+      const metersPerPixel = earthCircumference * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom + 8);
+      return (km * 1000) / metersPerPixel;
+    }
+
+    window.drawRadiusCanvas = function() {
+      const ctx = radiusCanvas.getContext('2d');
+      ctx.clearRect(0, 0, radiusCanvas.width, radiusCanvas.height);
+      const mc = map.getCanvas();
+      const mcRect = mc.getBoundingClientRect();
+      const dpr = mc.width / Math.max(1, mcRect.width);
+      const zoom = map.getZoom();
+
+      activeFeatures.forEach(feat => {
+        const fn = feat.properties.fileName;
+        const [lng, lat] = feat.geometry.coordinates;
+        const pt = map.project([lng, lat]);
+        const px = pt.x * dpr;
+        const py = pt.y * dpr;
+
+        if (BIG_CIRCLE_ICONS.has(fn)) {
+          const radiusPx = kmToPixels(10, lat, zoom) * dpr;
+          ctx.beginPath();
+          ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(184, 157, 200, 0.18)';
+          ctx.fill();
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+          ctx.strokeStyle = '#b89dc8';
+          ctx.lineWidth = 1.2 * dpr;
+          ctx.stroke();
+          return;
+        }
+
+        if (RECON_ICONS.has(fn)) {
+          const radiusPx = kmToPixels(6, lat, zoom) * dpr;
+          ctx.beginPath();
+          ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(184, 157, 200, 0.18)';
+          ctx.fill();
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+          ctx.strokeStyle = '#b89dc8';
+          ctx.lineWidth = 1.2 * dpr;
+          ctx.stroke();
+          return;
+        }
+
+        if (settingsDrone500m) {
+          const radiusPx = kmToPixels(1.0, lat, zoom) * dpr;
+          ctx.setLineDash([]);
+          ctx.beginPath();
+          ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(184, 157, 200, 0.13)';
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+          ctx.strokeStyle = '#b89dc8';
+          ctx.lineWidth = 1.2 * dpr;
+          ctx.stroke();
+        }
+      });
+    };
+
+    const arrowImg = new Image();
+    arrowImg.src = 'icons/стрелка.png';
+
+    window.drawDroneCanvas = function() {
+      const ctx = droneCanvas.getContext('2d');
+      ctx.clearRect(0, 0, droneCanvas.width, droneCanvas.height);
+      const mc = map.getCanvas();
+      const mcRect = mc.getBoundingClientRect();
+      const dpr = mc.width / Math.max(1, mcRect.width);
+
+      activeFeatures.forEach(feat => {
+        const [lng, lat] = feat.geometry.coordinates;
+        const pt = map.project([lng, lat]);
+        const rotation = feat.properties.rotation || 0;
+
+        const iconCX = pt.x * dpr;
+        const iconCY = pt.y * dpr;
+
+        // Малюємо саму іконку БПЛА
+        const fileName = feat.properties.fileName;
+        const iconSize = 32 * dpr;
+
+        // Коло під ціллю — малюємо ДО іконки щоб іконка була поверх
+        if (settingsTargetCircle) {
+          const tcRadius = (iconSize / 2) * (settingsTargetCircleSize / 100);
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(iconCX, iconCY, tcRadius, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,0,0,0)';
+          ctx.fill();
+          ctx.strokeStyle = settingsTargetCircleColor;
+          ctx.lineWidth = settingsTargetCircleWidth * dpr;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        const imgEls = document.querySelectorAll(`img[src="icons/${fileName}"]`);
+        if (imgEls.length > 0 && imgEls[0].complete && imgEls[0].naturalWidth > 0) {
+          ctx.save();
+          ctx.translate(iconCX, iconCY);
+          ctx.rotate(rotation * Math.PI / 180);
+          ctx.drawImage(imgEls[0], -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+          ctx.restore();
+        } else {
+          // Fallback: кольоровий кружок
+          const color = ICON_AUTO_COLORS[fileName] || '#38bdf8';
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(iconCX, iconCY, 10 * dpr, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2 * dpr;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        if (settingsDroneLabels) {
+          const labelText = feat.properties.typeName || (feat.properties.title || '').replace(/\s+\d+$/, '');
+          if (labelText) {
+            const labelX = iconCX;
+            const labelY = (pt.y - 26) * dpr;
+            const fontSize = 11.5 * dpr;
+
+            ctx.save();
+            ctx.font = `700 ${fontSize}px "Plus Jakarta Sans", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+
+            const textW = ctx.measureText(labelText).width;
+            const padX = 7 * dpr;
+            const padY = 4 * dpr;
+            const boxW = textW + padX * 2;
+            const boxH = fontSize + padY * 2;
+            const boxX = labelX - boxW / 2;
+            const boxY = labelY - boxH / 2;
+            const radius = 5 * dpr;
+
+            ctx.shadowColor = 'rgba(0,0,0,0.25)';
+            ctx.shadowBlur = 6 * dpr;
+            ctx.fillStyle = 'rgba(255,255,255,0.95)';
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+              ctx.roundRect(boxX, boxY, boxW, boxH, radius);
+            } else {
+              ctx.rect(boxX, boxY, boxW, boxH);
+            }
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1.5 * dpr;
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+              ctx.roundRect(boxX, boxY, boxW, boxH, radius);
+            } else {
+              ctx.rect(boxX, boxY, boxW, boxH);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillText(labelText, labelX, labelY);
+            ctx.restore();
+          }
+        }
+
+        if (!settingsDroneDirection) return;
+
+        const cx = (pt.x - 18) * dpr;
+        const cy = (pt.y + 18) * dpr;
+        const r = 13 * dpr;
+
+        ctx.save();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#fefafe';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = '#d91c20';
+        ctx.lineWidth = 3.2 * dpr;
+        ctx.stroke();
+
+        const compass = ((rotation + 270) % 360 + 360) % 360;
+        let arrowAngleRad;
+        if (compass >= 314 || compass <= 44) {
+          arrowAngleRad = Math.PI;
+        } else if (compass >= 46 && compass <= 134) {
+          arrowAngleRad = -Math.PI / 2;
+        } else if (compass >= 135 && compass <= 224) {
+          arrowAngleRad = 0;
+        } else {
+          arrowAngleRad = Math.PI / 2;
+        }
+
+        const arrowSize = r * 1.1;
+        ctx.translate(cx, cy);
+        ctx.rotate(arrowAngleRad);
+        if (arrowImg.complete && arrowImg.naturalWidth > 0) {
+          ctx.drawImage(arrowImg, -arrowSize / 2, -arrowSize / 2, arrowSize, arrowSize);
+        } else {
+          ctx.fillStyle = '#000000';
+          const as = 6 * dpr;
+          ctx.beginPath();
+          ctx.moveTo(0, -as * 0.9);
+          ctx.lineTo(-as * 0.5, as * 0.6);
+          ctx.lineTo(0, as * 0.3);
+          ctx.lineTo(as * 0.5, as * 0.6);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        ctx.restore();
+      });
+    };
+
+    arrowImg.onload = () => {
+      window.drawDroneCanvas && window.drawDroneCanvas();
+    };
+
+    window.drawTrajectoryCanvas = function() {
+      const ctx = trajCanvas.getContext('2d');
+      ctx.clearRect(0, 0, trajCanvas.width, trajCanvas.height);
+      return;
+    };
+
+    map.on('render', () => {
+      window.drawRadiusCanvas();
+      window.drawDroneCanvas();
+      window.drawTrajectoryCanvas && window.drawTrajectoryCanvas();
+    });
+
+    map.addSource('drones-src', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: []
+      }
+    });
+
+    map.addLayer({
+      id: 'drones-layer',
+      type: 'symbol',
+      source: 'drones-src',
+      layout: {
+        'icon-image': ['get', 'iconImage'],
+        'icon-size': 0,
+        'icon-rotate': ['get', 'rotation'],
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+        'icon-pitch-alignment': 'viewport',
+        'icon-rotation-alignment': 'map'
+      }
+    });
+
+    // --- Canvas-based hitbox для мишки (замість drones-layer з icon-size:0) ---
+    const ICON_HIT_RADIUS = 20; // пікселів від центру іконки
+
+    function getDroneAtPoint(clientX, clientY) {
+      let best = null;
+      let bestDist = Infinity;
+      for (const feat of activeFeatures) {
+        const pt = map.project(feat.geometry.coordinates);
+        const dx = clientX - pt.x;
+        const dy = clientY - pt.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= ICON_HIT_RADIUS && dist < bestDist) {
+          best = feat;
+          bestDist = dist;
+        }
+      }
+      return best;
+    }
+
+    const mapCanvasEl = map.getCanvas();
+
+    mapCanvasEl.addEventListener('mousedown', (e) => {
+      const feat = getDroneAtPoint(e.clientX, e.clientY);
+      if (feat) {
+        e.stopPropagation();
+        draggedFeatureId = feat.properties.id;
+        hoveredDroneId = feat.properties.id;
+        mapCanvasEl.style.cursor = 'grabbing';
+        map.dragPan.disable();
+      }
+    }, true);
+
+    mapCanvasEl.addEventListener('mousemove', (e) => {
+      if (draggedFeatureId) {
+        const lngLat = map.unproject([e.clientX, e.clientY]);
+        const feat = activeFeatures.find(f => f.properties.id === draggedFeatureId);
+        if (feat) {
+          feat.geometry.coordinates = [lngLat.lng, lngLat.lat];
+          requestUpdateGeoJSON(true);
+        }
+      } else {
+        const hit = getDroneAtPoint(e.clientX, e.clientY);
+        if (hit) {
+          mapCanvasEl.style.cursor = 'pointer';
+          hoveredDroneId = hit.properties.id;
+        } else {
+          mapCanvasEl.style.cursor = '';
+          hoveredDroneId = null;
+        }
+      }
+    });
+
+    mapCanvasEl.addEventListener('mouseup', () => {
+      if (draggedFeatureId) {
+        draggedFeatureId = null;
+        mapCanvasEl.style.cursor = '';
+        map.dragPan.enable();
+        updateGromadyHighlight();
+      }
+    });
+
+    const canvas = map.getCanvas();
+
+    function getTouchAngle(t1, t2) {
+      return Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * (180 / Math.PI);
+    }
+
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        // Шукаємо найближчий дрон у радіусі 32px (великий пальцевий хітбокс)
+        const TOUCH_HIT_RADIUS = 32;
+        let best = null;
+        let bestDist = Infinity;
+        for (const feat of activeFeatures) {
+          const pt = map.project(feat.geometry.coordinates);
+          const dx = touch.clientX - pt.x;
+          const dy = touch.clientY - pt.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist <= TOUCH_HIT_RADIUS && dist < bestDist) {
+            best = feat;
+            bestDist = dist;
+          }
+        }
+        if (best) {
+          e.preventDefault();
+          touchActiveDroneId = best.properties.id;
+          map.dragPan.disable();
+        }
+      } else if (e.touches.length === 2 && touchActiveDroneId) {
+        e.preventDefault();
+        map.dragPan.disable();
+        map.touchZoomRotate.disable();
+
+        const feat = activeFeatures.find(f => f.properties.id === touchActiveDroneId);
+        if (feat) {
+          initialTouchAngle = getTouchAngle(e.touches[0], e.touches[1]);
+          initialDroneRotation = feat.properties.rotation || 0;
+        }
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (!touchActiveDroneId) return;
+
+      if (e.touches.length === 1) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const lngLat = map.unproject([touch.clientX, touch.clientY]);
+        const feat = activeFeatures.find(f => f.properties.id === touchActiveDroneId);
+        if (feat) {
+          feat.geometry.coordinates = [lngLat.lng, lngLat.lat];
+          requestUpdateGeoJSON(true);
+        }
+      } else if (e.touches.length === 2) {
+        e.preventDefault();
+        const currentAngle = getTouchAngle(e.touches[0], e.touches[1]);
+        const angleDiff = currentAngle - initialTouchAngle;
+
+        const feat = activeFeatures.find(f => f.properties.id === touchActiveDroneId);
+        if (feat) {
+          feat.properties.rotation = (initialDroneRotation + angleDiff) % 360;
+          requestUpdateGeoJSON(true);
+        }
+      }
+    }, { passive: false });
+
+    const endTouch = () => {
+      if (touchActiveDroneId) {
+        touchActiveDroneId = null;
+        map.dragPan.enable();
+        map.touchZoomRotate.enable();
+        updateGromadyHighlight();
+      }
+    };
+
+    canvas.addEventListener('touchend', endTouch);
+    canvas.addEventListener('touchcancel', endTouch);
+
+    window.addEventListener('keydown', (e) => {
+      if (!hoveredDroneId) return;
+      const key = e.key.toLowerCase();
+      if (key === 'a' || key === 'd') {
+        const feat = activeFeatures.find(f => f.properties.id === hoveredDroneId);
+        if (feat) {
+          const delta = (key === 'a') ? -5 : 5;
+          feat.properties.rotation = (feat.properties.rotation || 0) + delta;
+          requestUpdateGeoJSON();
+        }
+      }
+    });
+
+    const mapCanvas = map.getCanvasContainer();
+    mapCanvas.addEventListener('wheel', (e) => {
+      const point = [e.clientX, e.clientY];
+      const bbox = [
+        [point[0] - 15, point[1] - 15],
+        [point[0] + 15, point[1] + 15]
+      ];
+      
+      const features = map.queryRenderedFeatures(bbox, { layers: ['drones-layer'] });
+      
+      if (features.length > 0) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const id = features[0].properties.id;
+        const feat = activeFeatures.find(f => f.properties.id === id);
+        
+        if (feat) {
+          const delta = Math.sign(e.deltaY);
+          feat.properties.rotation = (feat.properties.rotation || 0) + delta * 5;
+          requestUpdateGeoJSON();
+        }
+      }
+    }, { passive: false, capture: true });
+
+    applySettings(savedSettings);
+
+    gromadyHighlightEnabled.addEventListener('change', (e) => {
+      settingsGromadyHighlight = e.target.checked;
+      updateGromadyHighlight();
+      saveSettings();
+    });
+
+    gromadyFillColor.addEventListener('input', () => {
+      updateGromadyStyle();
+      saveSettings();
+    });
+
+    gromadyFillOpacity.addEventListener('input', () => {
+      updateGromadyStyle();
+      saveSettings();
+    });
+
+    maskColorInput.addEventListener('input', () => {
+      updateMaskStyle();
+      saveSettings();
+    });
+
+    maskOpacitySlider.addEventListener('input', () => {
+      updateMaskStyle();
+      saveSettings();
+    });
+
+    [dsOccupiedEnabled, dsUnknownEnabled, dsCrimeaEnabled].forEach(el => {
+      el.addEventListener('change', () => {
+        updateDeepStateStyles();
+        saveSettings();
+      });
+    });
+
+    [dsOccupiedOpacity, dsUnknownOpacity, dsCrimeaOpacity].forEach(el => {
+      el.addEventListener('input', () => {
+        updateDeepStateStyles();
+        saveSettings();
+      });
+    });
+
+    document.getElementById('drone-direction-enabled').addEventListener('change', (e) => {
+      settingsDroneDirection = e.target.checked;
+      window.drawDroneCanvas && window.drawDroneCanvas();
+      saveSettings(); // Добавлено
+    });
+
+    document.getElementById('drone-labels-enabled').addEventListener('change', (e) => {
+      settingsDroneLabels = e.target.checked;
+      window.drawDroneCanvas && window.drawDroneCanvas();
+      saveSettings(); // Добавлено
+    });
+
+    document.getElementById('drone-500m-enabled').addEventListener('change', (e) => {
+      settingsDrone500m = e.target.checked;
+      window.drawRadiusCanvas && window.drawRadiusCanvas();
+      saveSettings();
+    });
+
+    document.getElementById('target-circle-enabled').addEventListener('change', (e) => {
+      settingsTargetCircle = e.target.checked;
+      document.getElementById('target-circle-options').style.display = e.target.checked ? 'flex' : 'none';
+      window.drawDroneCanvas && window.drawDroneCanvas();
+      renderDisclaimerPanel();
+      saveSettings();
+    });
+
+    document.getElementById('target-circle-color').addEventListener('input', (e) => {
+      settingsTargetCircleColor = e.target.value;
+      window.drawDroneCanvas && window.drawDroneCanvas();
+      renderDisclaimerPanel();
+      saveSettings();
+    });
+
+    document.getElementById('target-circle-width').addEventListener('input', (e) => {
+      settingsTargetCircleWidth = parseFloat(e.target.value);
+      document.getElementById('target-circle-width-val').textContent = parseFloat(e.target.value).toFixed(1) + 'px';
+      window.drawDroneCanvas && window.drawDroneCanvas();
+      renderDisclaimerPanel();
+      saveSettings();
+    });
+
+    document.getElementById('target-circle-size').addEventListener('input', (e) => {
+      settingsTargetCircleSize = parseInt(e.target.value, 10);
+      document.getElementById('target-circle-size-val').textContent = e.target.value + '%';
+      window.drawDroneCanvas && window.drawDroneCanvas();
+      renderDisclaimerPanel();
+      saveSettings();
+    });
+
+    // --- Disclaimer listeners ---
+    disclaimerEnabled.addEventListener('change', () => { renderDisclaimerPanel(); saveSettings(); });
+    disclaimerTextInput.addEventListener('input', () => { renderDisclaimerPanel(); saveSettings(); });
+    disclaimerOpacitySlider.addEventListener('input', (e) => {
+      disclaimerOpacityValue.textContent = e.target.value + '%';
+      renderDisclaimerPanel(); saveSettings();
+    });
+    document.getElementById('disclaimer-show-icons').addEventListener('change', () => { renderDisclaimerPanel(); saveSettings(); });
+    document.getElementById('disclaimer-bg-color').addEventListener('input', () => { renderDisclaimerPanel(); saveSettings(); });
+    document.getElementById('disclaimer-text-color').addEventListener('input', () => { renderDisclaimerPanel(); saveSettings(); });
+    document.getElementById('disclaimer-border-color').addEventListener('input', () => { renderDisclaimerPanel(); saveSettings(); });
+    document.getElementById('disclaimer-border-width').addEventListener('input', (e) => {
+      document.getElementById('disclaimer-border-width-val').textContent = parseFloat(e.target.value).toFixed(1) + 'px';
+      renderDisclaimerPanel(); saveSettings();
+    });
+    document.getElementById('disclaimer-border-radius').addEventListener('input', (e) => {
+      document.getElementById('disclaimer-border-radius-val').textContent = e.target.value + 'px';
+      renderDisclaimerPanel(); saveSettings();
+    });
+    document.getElementById('disclaimer-pos-h').addEventListener('change', () => { renderDisclaimerPanel(); saveSettings(); });
+    document.getElementById('disclaimer-pos-v').addEventListener('change', () => { renderDisclaimerPanel(); saveSettings(); });
+    document.getElementById('disclaimer-width').addEventListener('input', (e) => {
+      document.getElementById('disclaimer-width-val').textContent = e.target.value + 'px';
+      renderDisclaimerPanel(); saveSettings();
+    });
+    document.getElementById('disclaimer-spacing').addEventListener('input', (e) => {
+      document.getElementById('disclaimer-spacing-val').textContent = e.target.value + 'px';
+      renderDisclaimerPanel(); saveSettings();
+    });
+    document.getElementById('disclaimer-font-size').addEventListener('input', (e) => {
+      document.getElementById('disclaimer-font-size-val').textContent = e.target.value + 'px';
+      renderDisclaimerPanel(); saveSettings();
+    });
+    document.getElementById('disclaimer-font-weight').addEventListener('change', () => { renderDisclaimerPanel(); saveSettings(); });
+    document.getElementById('disclaimer-label-font-size').addEventListener('input', (e) => {
+      document.getElementById('disclaimer-label-font-size-val').textContent = e.target.value + 'px';
+      renderDisclaimerPanel(); saveSettings();
+    });
+    document.getElementById('disclaimer-label-font-weight').addEventListener('change', () => { renderDisclaimerPanel(); saveSettings(); });
+
+    // --- Datetime listeners ---
+    datetimeEnabled.addEventListener('change', () => { updateDateTimeDisplay(); saveSettings(); });
+    datetimeAutoEnabled.addEventListener('change', () => { updateDateTimeDisplay(); saveSettings(); });
+    datetimeTextInput.addEventListener('input', () => {
+      if (!datetimeAutoEnabled.checked) datetimeTextView.textContent = datetimeTextInput.value;
+      saveSettings();
+    });
+    document.getElementById('datetime-bg-color').addEventListener('input', () => { updateDateTimeDisplay(); saveSettings(); });
+    document.getElementById('datetime-text-color-input').addEventListener('input', () => { updateDateTimeDisplay(); saveSettings(); });
+    document.getElementById('datetime-border-color').addEventListener('input', () => { updateDateTimeDisplay(); saveSettings(); });
+    document.getElementById('datetime-border-width').addEventListener('input', (e) => {
+      document.getElementById('datetime-border-width-val').textContent = parseFloat(e.target.value).toFixed(1) + 'px';
+      updateDateTimeDisplay(); saveSettings();
+    });
+    document.getElementById('datetime-border-radius').addEventListener('input', (e) => {
+      document.getElementById('datetime-border-radius-val').textContent = e.target.value + 'px';
+      updateDateTimeDisplay(); saveSettings();
+    });
+    document.getElementById('datetime-opacity-slider').addEventListener('input', (e) => {
+      document.getElementById('datetime-opacity-value').textContent = e.target.value + '%';
+      updateDateTimeDisplay(); saveSettings();
+    });
+    document.getElementById('datetime-pos-h').addEventListener('change', () => { updateDateTimeDisplay(); saveSettings(); });
+    document.getElementById('datetime-pos-v').addEventListener('change', () => { updateDateTimeDisplay(); saveSettings(); });
+
+    watermarkEnabled.addEventListener('change', () => {
+      renderWatermark();
+      saveSettings();
+    });
+
+    watermarkText.addEventListener('input', () => {
+      renderWatermark();
+      saveSettings();
+    });
+
+    watermarkColor.addEventListener('input', () => {
+      renderWatermark();
+      saveSettings();
+    });
+
+    watermarkOpacitySlider.addEventListener('input', () => {
+      syncWatermarkUI();
+      renderWatermark();
+      saveSettings();
+    });
+
+    watermarkSizeSlider.addEventListener('input', () => {
+      syncWatermarkUI();
+      renderWatermark();
+      saveSettings();
+    });
+
+    watermarkDensitySlider.addEventListener('input', () => {
+      syncWatermarkUI();
+      renderWatermark();
+      saveSettings();
+    });
+
+    watermarkAngleSlider.addEventListener('input', () => {
+      syncWatermarkUI();
+      renderWatermark();
+      saveSettings();
+    });
+
+    window.addEventListener('resize', () => {
+      if (watermarkEnabled.checked) renderWatermark();
+    });
+
+    window.addEventListener('beforeunload', () => {
+      saveSettings();
+    });
+
+    map.on('moveend', () => {
+      try {
+        const c = map.getCenter();
+        localStorage.setItem('shostka_map_view', JSON.stringify({ lng: c.lng, lat: c.lat, zoom: map.getZoom() }));
+      } catch(e) {}
+    });
+  });
+
+  document.getElementById('settings-close').addEventListener('click', () => {
+    document.getElementById('settings-menu').classList.remove('open');
+    document.getElementById('settings-btn').classList.remove('active');
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.getElementById('settings-menu').classList.remove('open');
+      document.getElementById('settings-btn').classList.remove('active');
+    }
+  });
+
+  document.getElementById('settings-btn').addEventListener('click', () => {
+    const menu = document.getElementById('settings-menu');
+    const btn = document.getElementById('settings-btn');
+    menu.classList.toggle('open');
+    btn.classList.toggle('active');
+  });
+
+  document.getElementById('export-settings-btn').addEventListener('click', () => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const settings = raw ? JSON.parse(raw) : defaultSettings;
+      const lines = [];
+      lines.push('# Shostka Map Settings Export');
+      lines.push('# Перетягніть цей файл у вікно браузера щоб відновити налаштування');
+      lines.push('');
+      function flatten(obj, prefix) {
+        for (const key of Object.keys(obj)) {
+          const val = obj[key];
+          const fullKey = prefix ? prefix + '.' + key : key;
+          if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
+            flatten(val, fullKey);
+          } else {
+            lines.push(fullKey + ' = ' + JSON.stringify(val));
+          }
+        }
+      }
+      flatten(settings, '');
+      const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'shostka-map-settings.txt';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    } catch(e) { alert('Помилка експорту: ' + e.message); }
+  });
+
+  const dropOverlay = document.getElementById('drop-overlay');
+
+  document.addEventListener('dragenter', (e) => {
+    if (e.dataTransfer && e.dataTransfer.types && e.dataTransfer.types.includes('Files')) {
+      dropOverlay.style.display = 'flex';
+    }
+  });
+  document.addEventListener('dragleave', (e) => {
+    if (e.relatedTarget === null || e.relatedTarget === document.documentElement) {
+      dropOverlay.style.display = 'none';
+    }
+  });
+  document.addEventListener('dragover', (e) => { e.preventDefault(); });
+  document.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropOverlay.style.display = 'none';
+    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!file || !file.name.endsWith('.txt')) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = ev.target.result;
+        const result = {};
+        for (const line of text.split('\n')) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith('#')) continue;
+          const eqIdx = trimmed.indexOf(' = ');
+          if (eqIdx === -1) continue;
+          const keyPath = trimmed.slice(0, eqIdx).trim();
+          const valStr = trimmed.slice(eqIdx + 3).trim();
+          let val;
+          try { val = JSON.parse(valStr); } catch(pe) { val = valStr; }
+          const parts = keyPath.split('.');
+          let obj = result;
+          for (let i = 0; i < parts.length - 1; i++) {
+            if (!obj[parts[i]] || typeof obj[parts[i]] !== 'object') obj[parts[i]] = {};
+            obj = obj[parts[i]];
+          }
+          obj[parts[parts.length - 1]] = val;
+        }
+        const merged = {
+          ...defaultSettings,
+          ...result,
+          gromady: { ...defaultSettings.gromady, ...(result.gromady || {}) },
+          mask: { ...defaultSettings.mask, ...(result.mask || {}) },
+          disclaimer: { ...defaultSettings.disclaimer, ...(result.disclaimer || {}) },
+          datetime: { ...defaultSettings.datetime, ...(result.datetime || {}) },
+          watermark: { ...defaultSettings.watermark, ...(result.watermark || {}) },
+          drone: { ...defaultSettings.drone, ...(result.drone || {}) },
+          deepstate: { ...defaultSettings.deepstate, ...(result.deepstate || {}) }
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        applySettings(merged);
+        updateGromadyStyle();
+        updateMaskStyle();
+        renderDisclaimerPanel();
+        updateDateTimeDisplay();
+        renderWatermark();
+        window.drawRadiusCanvas && window.drawRadiusCanvas();
+        window.drawDroneCanvas && window.drawDroneCanvas();
+        const t = document.getElementById('toast');
+        t.textContent = 'Налаштування імпортовано!';
+        t.classList.add('show');
+        setTimeout(() => { t.classList.remove('show'); t.textContent = 'Скриншот скопійовано в буфер обміну!'; }, 2500);
+      } catch(err) { alert('Помилка імпорту файлу: ' + err.message); }
+    };
+    reader.readAsText(file);
+  });
+
+  async function ensureImageLoaded(fileName) {
+    if (loadedImages.has(fileName)) return;
+    return new Promise((resolve) => {
+      map.loadImage(`icons/${fileName}`, (error, image) => {
+        if (!error && image) {
+          if (!map.hasImage(fileName)) {
+            map.addImage(fileName, image);
+          }
+          loadedImages.add(fileName);
+        }
+        resolve();
+      });
+    });
+  }
+
+  function getActualHeading(fileName, userRotation) {
+    return (270 + userRotation + 180) % 360;
+  }
+
+  function getTrajectoryCoords(lng, lat, compassBearing) {
+    const bearing = compassBearing * (Math.PI / 180);
+    const earthRadius = 6378137;
+    const distanceKm = 10;
+    const distance = distanceKm * 1000;
+    const angDist = distance / earthRadius;
+
+    const lat1 = lat * (Math.PI / 180);
+    const lon1 = lng * (Math.PI / 180);
+
+    const lat2 = Math.asin(
+      Math.sin(lat1) * Math.cos(angDist) +
+      Math.cos(lat1) * Math.sin(angDist) * Math.cos(bearing)
+    );
+
+    const lon2 = lon1 + Math.atan2(
+      Math.sin(bearing) * Math.sin(angDist) * Math.cos(lat1),
+      Math.cos(angDist) - Math.sin(lat1) * Math.sin(lat2)
+    );
+
+    return [
+      lon2 * (180 / Math.PI),
+      lat2 * (180 / Math.PI)
+    ];
+  }
+
+  async function addIconMarker(fileName, typeName) {
+    await ensureImageLoaded(fileName);
+
+    const center = map.getCenter();
+    const randomOffsetLng = (Math.random() - 0.5) * 0.01;
+    const randomOffsetLat = (Math.random() - 0.5) * 0.01;
+    const startCoords = [center.lng + randomOffsetLng, center.lat + randomOffsetLat];
+
+    markerCounters[typeName] = (markerCounters[typeName] || 0) + 1;
+    const title = `${typeName} ${markerCounters[typeName]}`;
+    const id = 'marker_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+
+    const initialRotation = 0;
+    const heading = getActualHeading(fileName, initialRotation);
+    const endCoords = getTrajectoryCoords(startCoords[0], startCoords[1], heading);
+
+    const color = ICON_AUTO_COLORS[fileName] || '#38bdf8';
+
+    const newFeature = {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: startCoords
+      },
+      properties: {
+        id: id,
+        title: title,
+        typeName: typeName,
+        fileName: fileName,
+        iconImage: fileName,
+        rotation: initialRotation,
+        checked: false
+      }
+    };
+
+    const trajFeature = {
+      type: 'Feature',
+      id: id + '_line',
+      geometry: {
+        type: 'LineString',
+        coordinates: [startCoords, endCoords]
+      },
+      properties: {
+        parentId: id,
+        color: color
+      }
+    };
+
+    activeFeatures.push(newFeature);
+    activeTrajectories.push(trajFeature);
+    
+    updateGeoJSON();
+    updateUIList();
+    renderDisclaimerPanel();
+    updateGromadyHighlight();
+  }
+
+  let _rafId = null;
+  let _pendingHighlight = false;
+  function requestUpdateGeoJSON(skipHighlight = false) {
+    if (!skipHighlight) _pendingHighlight = true;
+    if (_rafId) return;
+    _rafId = requestAnimationFrame(() => {
+      updateGeoJSON(!_pendingHighlight);
+      _pendingHighlight = false;
+      _rafId = null;
+    });
+  }
+
+  function updateGeoJSON(skipHighlight = false) {
+    const trajectoryById = new Map(activeTrajectories.map(line => [line.properties.parentId, line]));
+    activeFeatures.forEach(feat => {
+      const line = trajectoryById.get(feat.properties.id);
+      if (line) {
+        const heading = getActualHeading(feat.properties.fileName, feat.properties.rotation || 0);
+        line.geometry.coordinates = [
+          feat.geometry.coordinates,
+          getTrajectoryCoords(feat.geometry.coordinates[0], feat.geometry.coordinates[1], heading)
+        ];
+        line.properties.color = ICON_AUTO_COLORS[feat.properties.fileName] || '#38bdf8';
+      }
+    });
+
+    const source = map.getSource('drones-src');
+    if (source) {
+      source.setData({
+        type: 'FeatureCollection',
+        features: activeFeatures
+      });
+    }
+    if (!skipHighlight) updateGromadyHighlight();
+  }
+
+  function removeSingleMarker(id) {
+    activeFeatures = activeFeatures.filter(f => f.properties.id !== id);
+    activeTrajectories = activeTrajectories.filter(t => t.properties.parentId !== id);
+    updateGeoJSON();
+    updateUIList();
+    renderDisclaimerPanel();
+    updateGromadyHighlight();
+  }
+
+  function updateUIList() {
+    const listContainer = document.getElementById('objects-list');
+    const countContainer = document.getElementById('objects-count');
+    
+    countContainer.innerText = activeFeatures.length;
+    listContainer.innerHTML = '';
+
+    if (activeFeatures.length === 0) {
+      listContainer.innerHTML = '<div class="empty-msg">Немає активних об\'єктів на карті</div>';
+      return;
+    }
+
+    activeFeatures.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'object-item';
+
+      el.onclick = (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.classList.contains('delete')) return;
+        map.flyTo({ center: item.geometry.coordinates, zoom: Math.max(map.getZoom(), 10), speed: 1.2 });
+      };
+
+      el.innerHTML = `
+        <div class="object-item-info">
+          <input type="checkbox" ${item.properties.checked ? 'checked' : ''} onclick="event.stopPropagation(); toggleCheck('${item.properties.id}')">
+          <img src="icons/${item.properties.fileName}" alt="icon">
+          <span class="object-item-name">${item.properties.title}</span>
+        </div>
+        <div class="control-btn delete" onclick="event.stopPropagation(); removeSingleMarker('${item.properties.id}')">✕</div>
+      `;
+
+      listContainer.appendChild(el);
+    });
+  }
+
+  function toggleCheck(id) {
+    const item = activeFeatures.find(f => f.properties.id === id);
+    if (item) {
+      item.properties.checked = !item.properties.checked;
+    }
+  }
+
+  function selectAllObjects(status) {
+    activeFeatures.forEach(f => f.properties.checked = status);
+    updateUIList();
+  }
+
+  function deleteSelectedObjects() {
+    const idsToRemove = new Set(activeFeatures.filter(f => f.properties.checked).map(f => f.properties.id));
+    activeFeatures = activeFeatures.filter(f => !idsToRemove.has(f.properties.id));
+    activeTrajectories = activeTrajectories.filter(t => !idsToRemove.has(t.properties.parentId));
+    updateGeoJSON();
+    updateUIList();
+    renderDisclaimerPanel();
+    updateGromadyHighlight();
+  }
+
+  function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  async function generateCoursesReport() {
+    if (activeFeatures.length === 0) {
+      alert('Немає активних об\'єктів на карті для аналізу курсів.');
+      return;
+    }
+
+    try {
+      if (!kursDataCache) {
+        const res = await fetch('kurs.geojson');
+        kursDataCache = await res.json();
+      }
+      if (!regionsDataCache) {
+        const res = await fetch('regions.geojson');
+        regionsDataCache = await res.json();
+      }
+    } catch (e) {
+      alert('Помилка завантаження kurs.geojson або regions.geojson');
+      return;
+    }
+
+    function findRegionForPoint(lng, lat) {
+      for (const reg of regionsDataCache.features) {
+        if (pointInFeature([lng, lat], reg)) {
+          return reg.properties.name || reg.properties.NAME || reg.properties.region || 'Область';
+        }
+      }
+      return 'Інша область';
+    }
+
+    const reportByRegion = {};
+
+    activeFeatures.forEach(feat => {
+      const [droneLng, droneLat] = feat.geometry.coordinates;
+      const typeName = feat.properties.typeName || (feat.properties.title || '').replace(/\s+\d+$/, '');
+      const heading = getActualHeading(feat.properties.fileName, feat.properties.rotation || 0);
+
+      const matchedPlaces = [];
+
+      kursDataCache.features.forEach(place => {
+        let pLng, pLat;
+        if (place.geometry.type === 'Point') {
+          [pLng, pLat] = place.geometry.coordinates;
+        } else if (place.geometry.type === 'Polygon' || place.geometry.type === 'MultiPolygon') {
+          const ring = place.geometry.type === 'Polygon' ? place.geometry.coordinates[0] : place.geometry.coordinates[0][0];
+          pLng = ring[0][0];
+          pLat = ring[0][1];
+        } else {
+          return;
+        }
+
+        const dist = calculateDistanceKm(droneLat, droneLng, pLat, pLng);
+        if (dist <= 30) {
+          const y = Math.sin((pLng - droneLng) * Math.PI / 180) * Math.cos(pLat * Math.PI / 180);
+          const x = Math.cos(droneLat * Math.PI / 180) * Math.sin(pLat * Math.PI / 180) -
+                    Math.sin(droneLat * Math.PI / 180) * Math.cos(pLat * Math.PI / 180) * Math.cos((pLng - droneLng) * Math.PI / 180);
+          let bearing = Math.atan2(y, x) * 180 / Math.PI;
+          bearing = (bearing + 360) % 360;
+
+          let angleDiff = Math.abs(heading - bearing);
+          if (angleDiff > 180) angleDiff = 360 - angleDiff;
+
+          const placeName = place.properties.name || place.properties.NAME || place.properties.place || 'Н.П.';
+          
+          if (dist <= 1.5 || angleDiff <= 35) {
+            matchedPlaces.push({
+              name: placeName,
+              distance: dist,
+              lng: pLng,
+              lat: pLat
+            });
+          }
+        }
+      });
+
+      matchedPlaces.sort((a, b) => a.distance - b.distance);
+      const closestPlaces = matchedPlaces.slice(0, 1);
+
+      if (closestPlaces.length > 0) {
+        closestPlaces.forEach(p => {
+          const regionName = findRegionForPoint(p.lng, p.lat);
+          if (!reportByRegion[regionName]) {
+            reportByRegion[regionName] = [];
+          }
+          reportByRegion[regionName].push({
+            type: typeName,
+            place: p.name
+          });
+        });
+      } else {
+        const defaultRegion = findRegionForPoint(droneLng, droneLat);
+        if (!reportByRegion[defaultRegion]) {
+          reportByRegion[defaultRegion] = [];
+        }
+        reportByRegion[defaultRegion].push({
+          type: typeName,
+          place: null
+        });
+      }
+    });
+
+    let reportLines = [];
+    for (const [region, items] of Object.entries(reportByRegion)) {
+      const regionHeader = region.toLowerCase().includes('область') ? region : `${region} область`;
+      reportLines.push(`${regionHeader}:`);
+
+      const counts = new Map();
+      items.forEach(item => {
+        const key = `${item.type}|${item.place || ''}`;
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+
+      counts.forEach((count, key) => {
+        const [type, place] = key.split('|');
+        const countStr = count > 1 ? ` ${count} од.` : '';
+
+        if (place) {
+          reportLines.push(` ◦ ${type} → ${place}${countStr}`);
+        } else {
+          reportLines.push(` ◦ ${type}${count > 1 ? ` ${count} од.` : ' 1 од.'}`);
+        }
+      });
+    }
+
+    const finalReportText = reportLines.join('\n');
+
+    try {
+      await navigator.clipboard.writeText(finalReportText);
+      const t = document.getElementById('toast');
+      t.textContent = 'Звіт курсів скопійовано в буфер!';
+      t.classList.add('show');
+      setTimeout(() => {
+        t.classList.remove('show');
+        t.textContent = 'Скриншот скопійовано в буфер обміну!';
+      }, 3000);
+    } catch (e) {
+      alert(finalReportText);
+    }
+  }
+
+  async function takeScreenshot() {
+    if (document.getElementById('screenshot-selection-layer')) return;
+
+    const uiPanel = document.getElementById('ui-panel');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsMenu = document.getElementById('settings-menu');
+    const toast = document.getElementById('toast');
+    const oldPanelDisplay = uiPanel.style.display;
+    const oldSettingsBtnDisplay = settingsBtn.style.display;
+    const oldSettingsMenuDisplay = settingsMenu.style.display;
+
+    uiPanel.style.display = 'none';
+    settingsBtn.style.display = 'none';
+    settingsMenu.style.display = 'none';
+
+    const layer = document.createElement('div');
+    layer.id = 'screenshot-selection-layer';
+    const rect = document.createElement('div');
+    rect.id = 'screenshot-selection-rect';
+    const hint = document.createElement('div');
+    hint.id = 'screenshot-selection-hint';
+    hint.textContent = 'Затисни і виділи область • Esc / два пальці — скасування';
+    layer.append(rect, hint);
+    document.body.appendChild(layer);
+
+    let startX = 0, startY = 0, currentX = 0, currentY = 0;
+    let dragging = false;
+    let finished = false;
+
+    const restoreUi = () => {
+      layer.remove();
+      uiPanel.style.display = oldPanelDisplay;
+      settingsBtn.style.display = oldSettingsBtnDisplay;
+      settingsMenu.style.display = oldSettingsMenuDisplay;
+      renderDisclaimerPanel();
+      updateDateTimeDisplay();
+    };
+
+    const drawRect = () => {
+      const left = Math.min(startX, currentX);
+      const top = Math.min(startY, currentY);
+      rect.style.left = `${left}px`;
+      rect.style.top = `${top}px`;
+      rect.style.width = `${Math.abs(currentX - startX)}px`;
+      rect.style.height = `${Math.abs(currentY - startY)}px`;
+      rect.style.display = 'block';
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape' && !finished) {
+        finished = true;
+        cleanupListeners();
+        restoreUi();
+      }
+    };
+    const cleanupListeners = () => {
+      layer.removeEventListener('pointerdown', onPointerDown);
+      layer.removeEventListener('pointermove', onPointerMove);
+      layer.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+    const onPointerDown = (e) => {
+      if (finished) return;
+      e.preventDefault();
+      dragging = true;
+      startX = currentX = e.clientX;
+      startY = currentY = e.clientY;
+      drawRect();
+    };
+    const onPointerMove = (e) => {
+      if (!dragging || finished) return;
+      currentX = e.clientX;
+      currentY = e.clientY;
+      drawRect();
+    };
+    const onPointerUp = async (e) => {
+      if (!dragging || finished) return;
+      dragging = false;
+      currentX = e.clientX;
+      currentY = e.clientY;
+      drawRect();
+      finished = true;
+      cleanupListeners();
+
+      const left = Math.max(0, Math.min(startX, currentX));
+      const top = Math.max(0, Math.min(startY, currentY));
+      const width = Math.min(window.innerWidth, Math.max(startX, currentX)) - left;
+      const height = Math.min(window.innerHeight, Math.max(startY, currentY)) - top;
+      if (width < 12 || height < 12) {
+        restoreUi();
+        return;
+      }
+
+      const canvasRect = map.getCanvas().getBoundingClientRect();
+      const featuresInBox = activeFeatures.filter(f => {
+        const pt = map.project(f.geometry.coordinates);
+        const screenX = pt.x + canvasRect.left;
+        const screenY = pt.y + canvasRect.top;
+        return screenX >= left && screenX <= left + width && screenY >= top && screenY <= top + height;
+      });
+
+      let originalPixelRatio = null;
+      try {
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+        const initialCanvas = map.getCanvas();
+        const initialRect = initialCanvas.getBoundingClientRect();
+        originalPixelRatio = initialCanvas.width / Math.max(1, initialRect.width);
+        
+        const scale = Math.min(4, 3840 / Math.max(width, height));
+
+        if (typeof map.setPixelRatio === 'function') {
+          const maxCanvasSide = 8192;
+          const safeRatio = Math.min(
+            Math.max(originalPixelRatio, scale),
+            maxCanvasSide / Math.max(1, initialRect.width),
+            maxCanvasSide / Math.max(1, initialRect.height)
+          );
+          if (safeRatio > originalPixelRatio + 0.01) {
+            map.setPixelRatio(safeRatio);
+            map.resize();
+            await new Promise(resolve => {
+              let done = false;
+              const finish = () => { if (!done) { done = true; map.off('idle', finish); resolve(); } };
+              map.once('idle', finish);
+              setTimeout(finish, 1800);
+              map.triggerRepaint();
+            });
+          }
+        }
+
+        window.drawRadiusCanvas && window.drawRadiusCanvas();
+        window.drawDroneCanvas && window.drawDroneCanvas();
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+        const mapCanvas = map.getCanvas();
+        const mapCanvasRect = mapCanvas.getBoundingClientRect();
+        const dprX = mapCanvas.width / Math.max(1, mapCanvasRect.width);
+        const dprY = mapCanvas.height / Math.max(1, mapCanvasRect.height);
+        const sx = Math.max(0, Math.round((left - mapCanvasRect.left) * dprX));
+        const sy = Math.max(0, Math.round((top - mapCanvasRect.top) * dprY));
+        const sw = Math.max(1, Math.min(Math.round(width * dprX), mapCanvas.width - sx));
+        const sh = Math.max(1, Math.min(Math.round(height * dprY), mapCanvas.height - sy));
+        
+        const out = document.createElement('canvas');
+        out.width = Math.max(1, Math.round(width * scale));
+        out.height = Math.max(1, Math.round(height * scale));
+        const ctx = out.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        ctx.drawImage(mapCanvas, sx, sy, sw, sh, 0, 0, out.width, out.height);
+
+        try {
+          const rc = document.getElementById('radius-canvas');
+          if (rc) {
+            ctx.drawImage(rc, sx, sy, sw, sh, 0, 0, out.width, out.height);
+          }
+        } catch(e) {}
+
+        try {
+          const dc = document.getElementById('drone-canvas');
+          if (dc) {
+            ctx.drawImage(dc, sx, sy, sw, sh, 0, 0, out.width, out.height);
+          }
+        } catch(e) {}
+
+        ctx.save();
+        ctx.scale(scale, scale);
+
+        if (disclaimerEnabled.checked) {
+          try {
+            const ds = getDisclaimerStyle();
+            const discRect = legendPanel.getBoundingClientRect();
+            const discLeft = discRect.left - left;
+            const discTop = discRect.top - top;
+
+            const pad = 10;
+            const boxW = ds.width || 280;
+            const spacing = ds.spacing || 10;
+            const discFontSize = ds.fontSize || 11;
+            const discFontWeight = ds.fontWeight || '700';
+            const labelFontSize = ds.labelFontSize || 12;
+            const labelFontWeight = ds.labelFontWeight || '800';
+
+            // Measure disclaimer text with correct font
+            ctx.save();
+            ctx.font = `${discFontWeight} ${discFontSize}px "Plus Jakarta Sans", sans-serif`;
+            const text = disclaimerTextInput.value;
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+            const maxTextW = boxW - pad * 2;
+            for (const word of words) {
+              const testLine = currentLine ? currentLine + ' ' + word : word;
+              if (ctx.measureText(testLine).width > maxTextW && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            }
+            if (currentLine) lines.push(currentLine);
+            ctx.restore();
+
+            const lineH = discFontSize + 3;
+            const textBlockH = lines.length * lineH;
+
+            const showIcons = ds.showIcons;
+            const uniqueTypes = [];
+            const seenTypes = new Set();
+            activeFeatures.forEach(f => {
+              const typeName = f.properties.typeName || (f.properties.title || '').replace(/\s+\d+$/, '');
+              const fileName = f.properties.fileName;
+              if (!seenTypes.has(typeName)) { seenTypes.add(typeName); uniqueTypes.push({ typeName, fileName }); }
+            });
+
+            const iconSize = 17;
+            const iconOff = settingsTargetCircle ? Math.ceil(settingsTargetCircleWidth) : 0;
+            const iconImgW = iconSize + iconOff * 2;
+            const iconRowLineH = iconSize + iconOff * 2 + Math.max(2, spacing / 2);
+
+            // Pre-calculate icon rows for wrapping
+            let iconRows = [];
+            if (showIcons && uniqueTypes.length > 0) {
+              ctx.save();
+              ctx.font = `${labelFontWeight} ${labelFontSize}px "Plus Jakarta Sans", sans-serif`;
+              let rowItems = [];
+              let rowX = pad;
+              for (const item of uniqueTypes) {
+                const labelW = ctx.measureText(item.typeName).width;
+                const itemW = iconImgW + Math.max(2, Math.round(spacing * 0.4)) + labelW + spacing;
+                if (rowX + itemW > boxW - pad && rowItems.length > 0) {
+                  iconRows.push(rowItems);
+                  rowItems = [];
+                  rowX = pad;
+                }
+                rowItems.push(item);
+                rowX += itemW;
+              }
+              if (rowItems.length > 0) iconRows.push(rowItems);
+              ctx.restore();
+            }
+
+            const iconBlockH = iconRows.length > 0 ? (iconRows.length * iconRowLineH + Math.max(2, spacing / 2)) : 0;
+            const boxH = pad + textBlockH + (iconBlockH > 0 ? Math.max(4, spacing / 2) + iconBlockH : 0) + pad;
+            const discX = Math.max(10, discLeft);
+            const discY = Math.min(height - boxH - 10, Math.max(10, discTop));
+
+            ctx.save();
+            ctx.globalAlpha = ds.opacity;
+
+            ctx.fillStyle = ds.bgColor;
+            ctx.strokeStyle = ds.borderColor;
+            ctx.lineWidth = ds.borderWidth;
+            ctx.shadowColor = 'rgba(0,0,0,0.25)';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+              ctx.roundRect(discX, discY, boxW, boxH, ds.borderRadius);
+            } else {
+              ctx.rect(discX, discY, boxW, boxH);
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+            if (ds.borderWidth > 0) ctx.stroke();
+
+            ctx.fillStyle = ds.textColor;
+            ctx.font = `${discFontWeight} ${discFontSize}px "Plus Jakarta Sans", sans-serif`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            lines.forEach((line, i) => {
+              ctx.fillText(line, discX + pad, discY + pad + i * lineH);
+            });
+
+            if (iconRows.length > 0) {
+              let curRowY = discY + pad + textBlockH + Math.max(4, spacing / 2);
+              ctx.font = `${labelFontWeight} ${labelFontSize}px "Plus Jakarta Sans", sans-serif`;
+
+              for (const rowItems of iconRows) {
+                let iconX = discX + pad;
+                for (const { typeName, fileName } of rowItems) {
+                  const imgEls = document.querySelectorAll(`img[src="icons/${fileName}"]`);
+
+                  if (settingsTargetCircle) {
+                    const tcR = (iconSize / 2) * (settingsTargetCircleSize / 100);
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(iconX + iconOff + iconSize / 2, curRowY + iconOff + iconSize / 2, tcR, 0, Math.PI * 2);
+                    ctx.strokeStyle = settingsTargetCircleColor;
+                    ctx.lineWidth = settingsTargetCircleWidth;
+                    ctx.stroke();
+                    ctx.restore();
+                  }
+
+                  try {
+                    if (imgEls.length > 0 && imgEls[0].complete && imgEls[0].naturalWidth > 0) {
+                      ctx.drawImage(imgEls[0], iconX + iconOff, curRowY + iconOff, iconSize, iconSize);
+                    }
+                  } catch(ie) {}
+                  iconX += iconImgW + Math.max(2, Math.round(spacing * 0.4));
+
+                  ctx.fillStyle = ds.textColor;
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText(typeName, iconX, curRowY + iconOff + iconSize / 2);
+                  iconX += ctx.measureText(typeName).width + spacing;
+                }
+                curRowY += iconRowLineH;
+              }
+            }
+
+            ctx.restore();
+          } catch(e) {}
+        }
+
+        if (datetimeEnabled.checked) {
+          try {
+            const dts = getDatetimeStyle();
+            const dtRect = datetimePanel.getBoundingClientRect();
+            const dtLeft = dtRect.left - left;
+            const dtTop = dtRect.top - top;
+
+            const padX = 12;
+            ctx.save();
+            ctx.font = '700 11px "Inter", sans-serif';
+            const textContent = datetimeTextView.textContent;
+            const textWidth = ctx.measureText(textContent).width;
+            const boxW = textWidth + padX * 2;
+            const boxH = 26;
+
+            const dtX = Math.max(10, dtLeft);
+            const dtY = Math.max(10, dtTop);
+
+            ctx.globalAlpha = dts.opacity;
+            ctx.fillStyle = dts.bgColor;
+            ctx.strokeStyle = dts.borderColor;
+            ctx.lineWidth = dts.borderWidth;
+            ctx.shadowColor = 'rgba(0,0,0,0.25)';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') {
+              ctx.roundRect(dtX, dtY, boxW, boxH, dts.borderRadius);
+            } else {
+              ctx.rect(dtX, dtY, boxW, boxH);
+            }
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+            if (dts.borderWidth > 0) ctx.stroke();
+
+            ctx.fillStyle = dts.textColor;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(textContent, dtX + padX, dtY + boxH / 2);
+
+            ctx.restore();
+          } catch(e) {}
+        }
+
+        if (watermarkEnabled.checked) {
+          try {
+            const wmText = (watermarkText.value.trim() || 'ШОСТКА • ОГЛЯД');
+            const wmColor = watermarkColor.value;
+            const wmOpacity = parseInt(watermarkOpacitySlider.value, 10) / 100;
+            const wmSize = parseInt(watermarkSizeSlider.value, 10);
+            const wmDensity = parseInt(watermarkDensitySlider.value, 10);
+            const wmAngle = parseInt(watermarkAngleSlider.value, 10);
+
+            const screenW = window.innerWidth;
+            const screenH = window.innerHeight;
+
+            const cols = Math.max(1, Math.round(Math.sqrt(wmDensity * screenW / Math.max(1, screenH))));
+            const rows = Math.max(1, Math.round(wmDensity / cols));
+            const cellW = screenW / cols;
+            const cellH = screenH / rows;
+
+            ctx.save();
+            ctx.font = `800 ${wmSize}px "Inter", "Plus Jakarta Sans", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = wmColor;
+            ctx.globalAlpha = wmOpacity;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+            ctx.shadowBlur = 3;
+
+            for (let r = 0; r < rows; r++) {
+              for (let c = 0; c < cols; c++) {
+                const screenCx = c * cellW + cellW / 2;
+                const screenCy = r * cellH + cellH / 2;
+                const x = screenCx - left;
+                const y = screenCy - top;
+                if (x < -wmSize * 4 || y < -wmSize * 4 || x > width + wmSize * 4 || y > height + wmSize * 4) continue;
+
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(wmAngle * Math.PI / 180);
+                ctx.fillText(wmText, 0, 0);
+                ctx.restore();
+              }
+            }
+            ctx.restore();
+          } catch (wmErr) {}
+        }
+
+        out.toBlob(blob => {
+          if (blob && navigator.clipboard && window.ClipboardItem) {
+            navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
+              toast.classList.add('show');
+              setTimeout(() => toast.classList.remove('show'), 2500);
+            }).catch(() => {});
+          }
+        });
+
+      } catch (err) {}
+
+      if (typeof map.setPixelRatio === 'function' && originalPixelRatio !== null) {
+        map.setPixelRatio(originalPixelRatio);
+        map.resize();
+      }
+
+      restoreUi();
+    };
+
+    layer.addEventListener('pointerdown', onPointerDown);
+    layer.addEventListener('pointermove', onPointerMove);
+    layer.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('keydown', onKeyDown);
+  }
+
+  // ════════════════════════════════════════════════════════
+  //  Маркери населених пунктів (loc1.json … loc4.json)
+  //  Перенесено з index.html
+  // ════════════════════════════════════════════════════════
+  const locMarkers = [];
+
+  function updateLocMarkersVisibility() {
+    const currentZoom = map.getZoom();
+    locMarkers.forEach(item => {
+      if (currentZoom >= item.minZoom) {
+        if (item.element.classList.contains('marker-hidden')) {
+          item.element.classList.remove('marker-hidden');
+          void item.element.offsetWidth;
+        }
+        item.element.style.opacity = '1';
+      } else {
+        item.element.style.opacity = '0';
+        item.element.classList.add('marker-hidden');
+      }
+    });
+  }
+
+  let _locZoomTimeout;
+  map.on('zoom', () => {
+    clearTimeout(_locZoomTimeout);
+    _locZoomTimeout = setTimeout(updateLocMarkersVisibility, 50);
+  });
+
+  function createLocMarkers(places) {
+    let created = 0;
+    places.forEach(place => {
+      if (!place || !Array.isArray(place.coords) || place.coords.length !== 2 ||
+          typeof place.coords[0] !== 'number' || typeof place.coords[1] !== 'number') {
+        return;
+      }
+      const wrapper = document.createElement('div');
+      const label = document.createElement('span');
+      label.className = `map-label style-${place.type}`;
+      label.textContent = place.name;
+      label.setAttribute('data-shadow', place.name);
+
+      if (place.dot) {
+        wrapper.className = 'marker-with-dot';
+        const dot = document.createElement('div');
+        dot.className = 'custom-dot';
+        wrapper.appendChild(dot);
+        wrapper.appendChild(label);
+      } else {
+        wrapper.className = 'marker-center';
+        wrapper.appendChild(label);
+      }
+
+      const marker = new maplibregl.Marker({ element: wrapper, anchor: 'top-left' })
+        .setLngLat(place.coords)
+        .addTo(map);
+
+      locMarkers.push({
+        marker,
+        element: wrapper,
+        minZoom: typeof place.minZoom === 'number' ? place.minZoom : 0
+      });
+      created++;
+    });
+    return created;
+  }
+
+  const locFiles = ['./loc1.json', './loc2.json', './loc3.json', './loc4.json'];
+  Promise.all(
+    locFiles.map(file =>
+      fetch(file)
+        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} — ${file}`); return r.json(); })
+        .then(data => {
+          console.log(`${file}: завантажено ${Array.isArray(data) ? data.length : 1} об'єктів`);
+          return Array.isArray(data) ? data : [data];
+        })
+        .catch(err => { console.warn(`Не вдалося завантажити ${file}:`, err); return []; })
+    )
+  ).then(results => {
+    const allPlaces = results.flat();
+    if (allPlaces.length > 0) createLocMarkers(allPlaces);
+    updateLocMarkersVisibility();
+  });
+
+  map.on('load', () => { updateLocMarkersVisibility(); });
+  if (map.loaded()) updateLocMarkersVisibility();
+</script>
+</body>
+</html>
