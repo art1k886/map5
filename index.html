@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Карта НП</title>
     <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
@@ -25,6 +25,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body, html {
@@ -33,6 +34,8 @@
             overflow: hidden;
             font-family: 'CustomArial', Arial, sans-serif;
             background: #111;
+            touch-action: none;
+            overscroll-behavior: none;
         }
 
         #map {
@@ -115,13 +118,13 @@
             transform: translate(-50%, -50%);
         }
 
-        /* ================= ЗАСПАВНЕННЫЕ ОБЪЕКТЫ ================= */
         .spawned-unit {
             position: relative;
             width: 0;
             height: 0;
             cursor: grab;
             user-select: none;
+            touch-action: none;
             z-index: 20;
         }
 
@@ -137,9 +140,11 @@
             transform: translate(-50%, -50%) rotate(0deg);
             transform-origin: center center;
             pointer-events: auto;
+            touch-action: none;
             -webkit-user-drag: none;
             filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.35));
             transition: filter 0.15s ease;
+            will-change: transform;
         }
 
         body.unit-outline-enabled .spawned-unit img {
@@ -193,7 +198,6 @@
             opacity: 1;
         }
 
-        /* ================= LIQUID GLASS UI ================= */
         .top-right-controls {
             position: fixed;
             top: 16px;
@@ -244,7 +248,6 @@
             transform: rotate(90deg);
         }
 
-        /* ================= ПАНЕЛЬ СПАВНА ОБЪЕКТОВ (DOCK) ================= */
         .spawn-dock-wrapper {
             position: fixed;
             bottom: 16px;
@@ -273,7 +276,10 @@
                 0 12px 32px rgba(0, 0, 0, 0.45),
                 inset 0 1px 1px rgba(255, 255, 255, 0.28);
             overflow-x: auto;
+            overflow-y: hidden;
             scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
         }
 
         .spawn-dock::-webkit-scrollbar {
@@ -358,7 +364,65 @@
             background: linear-gradient(145deg, rgba(85, 28, 34, 0.82), rgba(48, 16, 20, 0.74));
         }
 
-        /* ================= РЕЖИМ СКРИНШОТА (WINDOWS SNIPPING STYLE) ================= */
+        .disclaimer-block {
+            position: fixed;
+            left: 16px;
+            bottom: 16px;
+            z-index: 880;
+            width: 320px;
+            background: #ffffff;
+            border: 1.3px solid #000000;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 14px;
+            font-family: Arial, sans-serif;
+            color: #1f2937;
+            transition: opacity 0.2s ease;
+            pointer-events: auto;
+            transform-origin: bottom left;
+        }
+
+        .disclaimer-text {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+
+        .disclaimer-units {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            align-items: center;
+        }
+
+        .disclaimer-unit-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            font-size: 13px;
+            color: #374151;
+            font-weight: 600;
+            height: 24px;
+        }
+
+        .disclaimer-unit-item img {
+            width: auto;
+            height: 20px;
+            max-width: 24px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .disclaimer-empty {
+            font-size: 12px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
         .snip-overlay {
             position: fixed;
             inset: 0;
@@ -366,6 +430,7 @@
             cursor: crosshair;
             display: none;
             user-select: none;
+            touch-action: none;
         }
 
         .snip-overlay.active {
@@ -405,7 +470,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            pointer-events: auto;
+            pointer-events: none;
         }
 
         .snip-hud kbd {
@@ -429,6 +494,7 @@
             pointer-events: none;
             display: none;
             font-variant-numeric: tabular-nums;
+            z-index: 2001;
         }
 
         .glass-toast {
@@ -461,7 +527,6 @@
             opacity: 1;
         }
 
-        /* ================= МОДАЛЬНОЕ ОКНО НАСТРОЕК ================= */
         .settings-backdrop {
             position: fixed;
             inset: 0;
@@ -513,6 +578,8 @@
             transition: 
                 transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
                 opacity 0.28s ease;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .settings-backdrop.open .settings-modal {
@@ -721,13 +788,140 @@
             opacity: 0 !important;
             pointer-events: none !important;
         }
+
+        .textarea-custom {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            resize: vertical;
+            min-height: 60px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .textarea-custom:focus {
+            border-color: rgba(96, 165, 250, 0.8);
+        }
+
+        @media (max-width: 768px) {
+            .top-right-controls {
+                top: 10px;
+                right: 10px;
+                gap: 8px;
+            }
+            .glass-icon-btn {
+                width: 38px;
+                height: 38px;
+                border-radius: 12px;
+            }
+            .glass-icon-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+            .spawn-dock-wrapper {
+                bottom: 10px;
+                max-width: calc(100vw - 16px);
+                gap: 6px;
+            }
+            .spawn-dock {
+                padding: 6px 8px;
+                gap: 4px;
+                border-radius: 16px;
+            }
+            .spawn-item-btn {
+                width: 40px;
+                height: 42px;
+                border-radius: 11px;
+            }
+            .spawn-item-btn img {
+                width: 20px;
+                height: 20px;
+            }
+            .spawn-item-label {
+                font-size: 7.5px;
+                max-width: 36px;
+            }
+            .clear-units-btn {
+                height: 38px;
+                padding: 0 10px;
+                font-size: 10.5px;
+                border-radius: 13px;
+            }
+            .disclaimer-block {
+                left: 10px;
+                bottom: 10px;
+                width: 260px;
+                padding: 10px 12px;
+            }
+            .disclaimer-text {
+                font-size: 12px;
+                margin-bottom: 6px;
+                padding-bottom: 6px;
+            }
+            .disclaimer-unit-item {
+                font-size: 11px;
+                height: 20px;
+            }
+            .disclaimer-unit-item img {
+                height: 16px;
+                max-width: 20px;
+            }
+            .snip-hud {
+                top: 10px;
+                font-size: 11px;
+                padding: 7px 12px;
+                max-width: calc(100vw - 20px);
+                text-align: center;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .settings-modal {
+                width: calc(100vw - 24px);
+                padding: 16px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .glass-toast {
+                font-size: 12px;
+                padding: 8px 14px;
+                max-width: calc(100vw - 20px);
+                white-space: normal;
+                text-align: center;
+            }
+            .spawned-angle-badge {
+                font-size: 9px;
+                top: -24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .disclaimer-block {
+                bottom: 64px;
+                padding: 8px 10px;
+            }
+            .disclaimer-text {
+                font-size: 11px;
+                line-height: 1.35;
+            }
+            .spawn-item-btn {
+                width: 36px;
+                height: 38px;
+            }
+            .spawn-item-btn img {
+                width: 18px;
+                height: 18px;
+            }
+        }
     </style>
 </head>
 <body>
 
 <div id="map"></div>
 
-<!-- Кнопки справа сверху: Фотоаппарат и Настройки -->
 <div class="top-right-controls">
     <button class="glass-icon-btn" id="openSnipBtn" title="Скриншот области в 4K (буфер обмена)" aria-label="Скриншот области">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -744,7 +938,6 @@
     </button>
 </div>
 
-<!-- Панель спавна объектов (снизу) -->
 <div class="spawn-dock-wrapper">
     <div class="spawn-dock" id="spawnDock" title="Нажмите для добавления на карту. ЛКМ — двигать, Колёсико — вращать, ПКМ — удалить"></div>
     <button class="clear-units-btn" id="clearUnitsBtn" title="Удалить все объекты с карты">
@@ -753,21 +946,23 @@
     </button>
 </div>
 
-<!-- Оверлей выделения области скриншота -->
+<div class="disclaimer-block" id="disclaimerBlock">
+    <div class="disclaimer-text" id="disclaimerText"></div>
+    <div class="disclaimer-units" id="disclaimerUnits"></div>
+</div>
+
 <div class="snip-overlay" id="snipOverlay">
     <div class="snip-full-dim" id="snipFullDim"></div>
     <div class="snip-selection-box" id="snipSelectionBox"></div>
     <div class="snip-size-badge" id="snipSizeBadge">0 × 0</div>
     <div class="snip-hud">
-        <span>Выделите область ЛКМ для копирования в 4K</span>
+        <span>Выделите область для копирования в 4K</span>
         <kbd>Esc</kbd>
     </div>
 </div>
 
-<!-- Уведомление -->
 <div class="glass-toast" id="glassToast"></div>
 
-<!-- Модальное окно настроек -->
 <div class="settings-backdrop" id="settingsBackdrop">
     <div class="settings-modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-header">
@@ -839,6 +1034,32 @@
                 <input type="checkbox" id="ctrlLandcover" checked hidden>
                 <span class="switch"></span>
             </label>
+
+            <label class="toggle-row">
+                <span>Границы населённых пунктов</span>
+                <input type="checkbox" id="ctrlTownsBorders" checked hidden>
+                <span class="switch"></span>
+            </label>
+
+            <div class="control-row" style="margin-top: 8px;">
+                <div class="control-header">
+                    <span>Толщина границ НП</span>
+                    <span class="control-val" id="valTownsBorderWidth">0.5 px</span>
+                </div>
+                <input type="range" id="ctrlTownsBorderWidth" min="0.1" max="3" step="0.1" value="0.5">
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="section-label">Дисклеймер</div>
+            <div class="control-row">
+                <div class="control-header">
+                    <span>Размер дисклеймера</span>
+                    <span class="control-val" id="valDisclaimerScale">100%</span>
+                </div>
+                <input type="range" id="ctrlDisclaimerScale" min="70" max="150" step="5" value="100">
+            </div>
+            <textarea id="ctrlDisclaimerText" class="textarea-custom" placeholder="Введите текст дисклеймера..." style="margin-top: 8px;"></textarea>
         </div>
 
         <div class="modal-footer">
@@ -848,18 +1069,23 @@
 </div>
 
 <script>
-    /* ================= УПРАВЛЕНИЕ НАСТРОЙКАМИ И LOCALSTORAGE ================= */
-    const STORAGE_KEY = 'karta_np_settings_v3';
+    const DEFAULT_DISCLAIMER_TEXT = 'Дані зібрані з відкритих джерел та нанесені вручну. Iнформація може бути неповною або містити похибку. Не використовувати для прийняття рішень щодо безпеки.';
+
+    const STORAGE_KEY = 'karta_np_settings_v5';
 
     const DEFAULT_SETTINGS = {
-        saturation: 0,       // 0..100 (%)
-        darkness: 30,        // 0..85 (%)
-        shadowFloor: 22,     // 0..60 (%)
-        unitSize: 34,        // 18..72 (px)
-        unitOutline: true,   // Белая обводка по силуэту БПЛА
-        bordersOpacity: 100, // 0..100 (%)
+        saturation: 0,
+        darkness: 30,
+        shadowFloor: 22,
+        unitSize: 34,
+        unitOutline: true,
+        bordersOpacity: 100,
         showLabels: true,
-        showLandcover: true
+        showLandcover: true,
+        showTownsBorders: true,
+        townsBorderWidth: 0.5,
+        disclaimerText: DEFAULT_DISCLAIMER_TEXT,
+        disclaimerScale: 100
     };
 
     function loadSettings() {
@@ -880,7 +1106,6 @@
 
     let appSettings = loadSettings();
 
-    /* ================= СПИСОК ИКОНОК ОБЪЕКТОВ ИЗ ./icons/ ================= */
     const UNIT_CATALOG = [
         { file: 'шахед.png', label: 'Шахед' },
         { file: 'gerbera.png', label: 'Гербера' },
@@ -900,14 +1125,25 @@
         { file: 'невідомий.png', label: 'Невідом.' }
     ];
 
-    /* ================= ИНИЦИАЛИЗАЦИЯ КАРТЫ ================= */
+    const CUSTOM_LABELS_MAX_ZOOM = 12;
+
     const map = new maplibregl.Map({
         container: 'map',
         style: 'https://api.maptiler.com/maps/01a15d84-49c8-768b-8c27-37c84b553d7e/style.json?key=NxVg5ozWhACUzHBh2DZr',
         center: [33.56587, 51.87999],
         zoom: 8.3,
-        preserveDrawingBuffer: true
+        preserveDrawingBuffer: true,
+        dragRotate: true,
+        touchZoomRotate: true
     });
+
+    function darkenHex(hex, percent) {
+        const h = hex.replace('#', '');
+        const r = Math.max(0, Math.round(parseInt(h.substring(0, 2), 16) * (1 - percent / 100)));
+        const g = Math.max(0, Math.round(parseInt(h.substring(2, 4), 16) * (1 - percent / 100)));
+        const b = Math.max(0, Math.round(parseInt(h.substring(4, 6), 16) * (1 - percent / 100)));
+        return '#' + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
+    }
 
     function getGeomBBox(geom) {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -1000,15 +1236,17 @@
                 if (zoomFilter) fillLayer.filter = zoomFilter;
                 map.addLayer(fillLayer, beforeId);
 
+                const isTowns = name === 'towns';
+                const outlineColor = isTowns ? darkenHex(color, 25) : color;
                 const outlineLayer = {
                     id: `${name}-outline`,
                     type: 'line',
                     source: name,
                     layout: { 'visibility': vis },
                     paint: {
-                        'line-color': color,
-                        'line-width': 0.5,
-                        'line-opacity': 0.6
+                        'line-color': outlineColor,
+                        'line-width': isTowns ? appSettings.townsBorderWidth : 0.5,
+                        'line-opacity': isTowns ? (appSettings.showTownsBorders ? 0.9 : 0) : 0.6
                     }
                 };
                 if (zoomFilter) outlineLayer.filter = zoomFilter;
@@ -1073,7 +1311,6 @@
             .catch(err => console.error(`Ошибка линейного слоя ${name}:`, err));
     }
 
-    /* ================= CUSTOM WEBGL LAYER ================= */
     function createOutsideOsmLayer(ukraineData) {
         const rings = [];
         const collect = (geom) => {
@@ -1289,15 +1526,39 @@
         };
     }
 
-    /* ================= МАРКЕРЫ НАСЕЛЁННЫХ ПУНКТОВ ================= */
     const markers = [];
+
+    const OSM_LABEL_LAYERS = [];
+    let osmLabelsVisible = null;
+
+    function updateOsmLabelsVisibility() {
+        if (!map || !map.getStyle()) return;
+        const z = map.getZoom();
+        const shouldShow = z >= CUSTOM_LABELS_MAX_ZOOM;
+        if (shouldShow === osmLabelsVisible) return;
+        osmLabelsVisible = shouldShow;
+
+        OSM_LABEL_LAYERS.forEach(id => {
+            if (!map.getLayer(id)) return;
+            try {
+                map.setLayoutProperty(id, 'visibility', shouldShow ? 'visible' : 'none');
+                if (shouldShow) {
+                    try { map.setLayoutProperty(id, 'icon-image', ''); } catch(_) {}
+                    try { map.setLayoutProperty(id, 'icon-size', 0); } catch(_) {}
+                    try { map.setLayoutProperty(id, 'icon-allow-overlap', false); } catch(_) {}
+                    try { map.setLayoutProperty(id, 'icon-ignore-placement', false); } catch(_) {}
+                }
+            } catch(_) {}
+        });
+    }
 
     function updateMarkersVisibility() {
         const currentZoom = map.getZoom();
         const bounds = map.getBounds();
+        const customLabelsAllowed = currentZoom < CUSTOM_LABELS_MAX_ZOOM;
 
         markers.forEach(item => {
-            if (!appSettings.showLabels) {
+            if (!appSettings.showLabels || !customLabelsAllowed) {
                 item.element.style.opacity = '0';
                 item.element.classList.add('marker-hidden');
                 return;
@@ -1319,6 +1580,26 @@
         });
     }
 
+    function forceCustomMarkersVisible() {
+        const bounds = map.getBounds();
+        markers.forEach(item => {
+            if (!appSettings.showLabels) {
+                item.element.style.opacity = '0';
+                item.element.classList.add('marker-hidden');
+                return;
+            }
+            const isInBounds = bounds.contains(item.lngLat);
+            const isZoomValid = map.getZoom() >= item.minZoom;
+            if (isZoomValid && isInBounds) {
+                item.element.classList.remove('marker-hidden');
+                item.element.style.opacity = '1';
+            } else {
+                item.element.style.opacity = '0';
+                item.element.classList.add('marker-hidden');
+            }
+        });
+    }
+
     let visibilityTimeout;
     function scheduleVisibilityUpdate() {
         clearTimeout(visibilityTimeout);
@@ -1329,6 +1610,9 @@
     map.on('zoom', scheduleVisibilityUpdate);
     map.on('pitchend', scheduleVisibilityUpdate);
     map.on('rotate', scheduleVisibilityUpdate);
+
+    map.on('zoom', updateOsmLabelsVisibility);
+    map.on('move', updateOsmLabelsVisibility);
 
     function createMarkers(places) {
         places.forEach(place => {
@@ -1403,7 +1687,10 @@
 
         for (const layer of layers) {
             if (layer.type === 'symbol') {
-                map.setLayoutProperty(layer.id, 'visibility', 'none');
+                OSM_LABEL_LAYERS.push(layer.id);
+                try {
+                    map.setLayoutProperty(layer.id, 'visibility', 'none');
+                } catch(_) {}
             }
             if (layer.type === 'line' &&
                 (layer['source-layer'] === 'transportation' ||
@@ -1449,6 +1736,7 @@
 
     map.on('load', () => {
         updateMarkersVisibility();
+        updateOsmLabelsVisibility();
         applyAllSettingsToMap();
     });
 
@@ -1456,7 +1744,6 @@
         updateMarkersVisibility();
     }
 
-    /* ================= СПАВН И УПРАВЛЕНИЕ ОБЪЕКТАМИ ================= */
     const spawnedUnits = [];
     let hoveredUnit = null;
     let spawnCountOffset = 0;
@@ -1465,6 +1752,51 @@
     const clearUnitsBtn = document.getElementById('clearUnitsBtn');
     const unitsCounter = document.getElementById('unitsCounter');
 
+    const disclaimerBlock = document.getElementById('disclaimerBlock');
+    const disclaimerText = document.getElementById('disclaimerText');
+    const disclaimerUnits = document.getElementById('disclaimerUnits');
+
+    disclaimerText.textContent = appSettings.disclaimerText;
+
+    function updateDisclaimerUnits() {
+        const bounds = map.getBounds();
+        const uniqueUnits = new Map();
+
+        spawnedUnits.forEach(unit => {
+            const lngLat = unit.marker.getLngLat();
+            if (bounds.contains(lngLat)) {
+                if (!uniqueUnits.has(unit.label)) {
+                    uniqueUnits.set(unit.label, { file: unit.file, label: unit.label });
+                }
+            }
+        });
+
+        if (uniqueUnits.size === 0) {
+            disclaimerUnits.innerHTML = '<span class="disclaimer-empty">Нет объектов в кадре</span>';
+            return;
+        }
+
+        disclaimerUnits.innerHTML = '';
+        uniqueUnits.forEach((data) => {
+            const item = document.createElement('span');
+            item.className = 'disclaimer-unit-item';
+
+            const img = document.createElement('img');
+            img.src = `./icons/${data.file}`;
+            img.alt = data.label;
+
+            const text = document.createElement('span');
+            text.textContent = data.label;
+
+            item.appendChild(img);
+            item.appendChild(text);
+            disclaimerUnits.appendChild(item);
+        });
+    }
+
+    map.on('move', updateDisclaimerUnits);
+    map.on('zoom', updateDisclaimerUnits);
+
     function updateUnitsCounter() {
         unitsCounter.textContent = spawnedUnits.length;
         if (spawnedUnits.length > 0) {
@@ -1472,12 +1804,14 @@
         } else {
             clearUnitsBtn.classList.remove('visible');
         }
+        updateDisclaimerUnits();
     }
 
     function removeSpawnedUnit(unitObj) {
         const idx = spawnedUnits.indexOf(unitObj);
         if (idx !== -1) {
             unitObj.marker.remove();
+            if (unitObj.cleanupGesture) unitObj.cleanupGesture();
             spawnedUnits.splice(idx, 1);
             if (hoveredUnit === unitObj) hoveredUnit = null;
             updateUnitsCounter();
@@ -1487,6 +1821,7 @@
     clearUnitsBtn.addEventListener('click', () => {
         while (spawnedUnits.length > 0) {
             const u = spawnedUnits.pop();
+            if (u.cleanupGesture) u.cleanupGesture();
             u.marker.remove();
         }
         hoveredUnit = null;
@@ -1518,6 +1853,7 @@
         const img = document.createElement('img');
         img.src = `./icons/${item.file}`;
         img.alt = item.label;
+        img.draggable = false;
         img.style.width = `${appSettings.unitSize}px`;
         img.style.height = 'auto';
 
@@ -1549,52 +1885,24 @@
         wrapper.addEventListener('mouseenter', () => { hoveredUnit = unitObj; });
         wrapper.addEventListener('mouseleave', () => { if (hoveredUnit === unitObj) hoveredUnit = null; });
 
-        let isDragging = false;
-        let dragStartMouse = null;
-        let dragStartLngLat = null;
-
-        img.addEventListener('mousedown', (e) => {
-            if (e.button !== 0) return;
-            e.stopPropagation();
-            e.preventDefault();
-            isDragging = true;
-            dragStartMouse = { x: e.clientX, y: e.clientY };
-            dragStartLngLat = marker.getLngLat();
-            map.dragPan.disable();
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const startPx = map.project(dragStartLngLat);
-            const dx = e.clientX - dragStartMouse.x;
-            const dy = e.clientY - dragStartMouse.y;
-            const newLngLat = map.unproject([startPx.x + dx, startPx.y + dy]);
-            marker.setLngLat(newLngLat);
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            map.dragPan.enable();
-        });
-
         let badgeTimer = null;
-        wrapper.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const step = e.shiftKey ? 1 : 5;
-            const dir = e.deltaY > 0 ? 1 : -1;
-            unitObj.angle = (unitObj.angle + dir * step + 360) % 360;
-
+        function applyRotation(newAngle) {
+            unitObj.angle = (newAngle + 360) % 360;
             img.style.transform = `translate(-50%, -50%) rotate(${unitObj.angle}deg)`;
             badge.textContent = `${Math.round(unitObj.angle)}°`;
             wrapper.classList.add('rotating');
-
             clearTimeout(badgeTimer);
             badgeTimer = setTimeout(() => {
                 wrapper.classList.remove('rotating');
             }, 650);
+        }
+
+        wrapper.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const step = e.shiftKey ? 1 : 5;
+            const dir = e.deltaY > 0 ? 1 : -1;
+            applyRotation(unitObj.angle + dir * step);
         }, { passive: false });
 
         wrapper.addEventListener('contextmenu', (e) => {
@@ -1602,6 +1910,165 @@
             e.stopPropagation();
             removeSpawnedUnit(unitObj);
         });
+
+        let isMouseDragging = false;
+        let mouseStart = null;
+        let mouseStartLngLat = null;
+
+        function onImgMouseDown(e) {
+            if (e.button !== 0) return;
+            e.stopPropagation();
+            e.preventDefault();
+            isMouseDragging = true;
+            mouseStart = { x: e.clientX, y: e.clientY };
+            mouseStartLngLat = marker.getLngLat();
+            map.dragPan.disable();
+        }
+
+        function onWindowMouseMove(e) {
+            if (!isMouseDragging) return;
+            const startPx = map.project(mouseStartLngLat);
+            const dx = e.clientX - mouseStart.x;
+            const dy = e.clientY - mouseStart.y;
+            const newLngLat = map.unproject([startPx.x + dx, startPx.y + dy]);
+            marker.setLngLat(newLngLat);
+            updateDisclaimerUnits();
+        }
+
+        function onWindowMouseUp() {
+            if (!isMouseDragging) return;
+            isMouseDragging = false;
+            map.dragPan.enable();
+        }
+
+        img.addEventListener('mousedown', onImgMouseDown);
+        window.addEventListener('mousemove', onWindowMouseMove);
+        window.addEventListener('mouseup', onWindowMouseUp);
+
+        let touchMode = null;
+        let dragStartPoint = null;
+        let dragStartLngLat = null;
+        let rotateStartAngle = 0;
+        let unitStartAngle = 0;
+        let longPressTimer = null;
+        let touchMoved = false;
+
+        function clearLongPress() {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        }
+
+        function endTouchGesture() {
+            clearLongPress();
+            touchMode = null;
+            touchMoved = false;
+            wrapper.classList.remove('rotating');
+            map.dragPan.enable();
+            map.touchZoomRotate.enable();
+        }
+
+        function getTouchAngle(t1, t2) {
+            const dx = t2.clientX - t1.clientX;
+            const dy = t2.clientY - t1.clientY;
+            return Math.atan2(dy, dx) * 180 / Math.PI;
+        }
+
+        function onImgTouchStart(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            clearLongPress();
+
+            if (e.touches.length === 1) {
+                const t = e.touches[0];
+                touchMode = 'drag';
+                touchMoved = false;
+                dragStartPoint = { x: t.clientX, y: t.clientY };
+                dragStartLngLat = marker.getLngLat();
+
+                map.dragPan.disable();
+                map.touchZoomRotate.disable();
+
+                longPressTimer = setTimeout(() => {
+                    if (!touchMoved && touchMode === 'drag') {
+                        removeSpawnedUnit(unitObj);
+                        touchMode = null;
+                    }
+                }, 800);
+            } else if (e.touches.length === 2) {
+                clearLongPress();
+                touchMode = 'rotate';
+                touchMoved = true;
+                rotateStartAngle = getTouchAngle(e.touches[0], e.touches[1]);
+                unitStartAngle = unitObj.angle;
+
+                map.dragPan.disable();
+                map.touchZoomRotate.disable();
+                wrapper.classList.add('rotating');
+            }
+        }
+
+        function onImgTouchMove(e) {
+            if (!touchMode) return;
+            e.stopPropagation();
+            e.preventDefault();
+
+            if (touchMode === 'drag' && e.touches.length === 1) {
+                const t = e.touches[0];
+                const dx = t.clientX - dragStartPoint.x;
+                const dy = t.clientY - dragStartPoint.y;
+                if (!touchMoved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+                    touchMoved = true;
+                    clearLongPress();
+                }
+                const startPx = map.project(dragStartLngLat);
+                const newLngLat = map.unproject([startPx.x + dx, startPx.y + dy]);
+                marker.setLngLat(newLngLat);
+                updateDisclaimerUnits();
+            } else if (touchMode === 'rotate' && e.touches.length === 2) {
+                const currentAngle = getTouchAngle(e.touches[0], e.touches[1]);
+                let delta = currentAngle - rotateStartAngle;
+                if (delta > 180) delta -= 360;
+                if (delta < -180) delta += 360;
+                applyRotation(unitStartAngle + delta);
+            }
+        }
+
+        function onImgTouchEnd(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            if (e.touches.length === 0) {
+                endTouchGesture();
+            } else if (e.touches.length === 1 && touchMode === 'rotate') {
+                const t = e.touches[0];
+                touchMode = 'drag';
+                touchMoved = true;
+                dragStartPoint = { x: t.clientX, y: t.clientY };
+                dragStartLngLat = marker.getLngLat();
+                wrapper.classList.remove('rotating');
+            }
+        }
+
+        function onImgTouchCancel(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            endTouchGesture();
+        }
+
+        img.addEventListener('touchstart', onImgTouchStart, { passive: false });
+        img.addEventListener('touchmove', onImgTouchMove, { passive: false });
+        img.addEventListener('touchend', onImgTouchEnd, { passive: false });
+        img.addEventListener('touchcancel', onImgTouchCancel, { passive: false });
+
+        unitObj.cleanupGesture = () => {
+            window.removeEventListener('mousemove', onWindowMouseMove);
+            window.removeEventListener('mouseup', onWindowMouseUp);
+            clearLongPress();
+            map.dragPan.enable();
+            map.touchZoomRotate.enable();
+        };
 
         spawnedUnits.push(unitObj);
         updateUnitsCounter();
@@ -1627,7 +2094,6 @@
         spawnDock.appendChild(btn);
     });
 
-    /* ================= ИНСТРУМЕНТ СКРИНШОТА (ТОЧНАЯ КОПИЯ ОРИГИНАЛА В 4K) ================= */
     const openSnipBtn = document.getElementById('openSnipBtn');
     const snipOverlay = document.getElementById('snipOverlay');
     const snipFullDim = document.getElementById('snipFullDim');
@@ -1682,34 +2148,8 @@
         }
     });
 
-    snipOverlay.addEventListener('mousedown', (e) => {
-        if (e.button === 2) {
-            stopSnippingMode();
-            return;
-        }
-        if (e.button !== 0) return;
-
-        isSelectingRect = true;
-        snipStart = { x: e.clientX, y: e.clientY };
-        snipRect = { x: e.clientX, y: e.clientY, w: 0, h: 0 };
-
-        snipFullDim.style.display = 'none';
-        snipSelectionBox.style.display = 'block';
-        snipSelectionBox.style.left = `${e.clientX}px`;
-        snipSelectionBox.style.top = `${e.clientY}px`;
-        snipSelectionBox.style.width = '0px';
-        snipSelectionBox.style.height = '0px';
-    });
-
-    snipOverlay.addEventListener('mousemove', (e) => {
-        if (!isSelectingRect) return;
-
-        const x = Math.min(snipStart.x, e.clientX);
-        const y = Math.min(snipStart.y, e.clientY);
-        const w = Math.abs(e.clientX - snipStart.x);
-        const h = Math.abs(e.clientY - snipStart.y);
+    function snipUpdateBox(x, y, w, h) {
         snipRect = { x, y, w, h };
-
         snipSelectionBox.style.left = `${x}px`;
         snipSelectionBox.style.top = `${y}px`;
         snipSelectionBox.style.width = `${w}px`;
@@ -1720,30 +2160,77 @@
             snipSizeBadge.textContent = `${Math.round(w)} × ${Math.round(h)}`;
             snipSizeBadge.style.left = `${Math.min(window.innerWidth - 90, x)}px`;
             snipSizeBadge.style.top = `${Math.max(8, y - 26)}px`;
+        } else {
+            snipSizeBadge.style.display = 'none';
         }
-    });
+    }
 
-    snipOverlay.addEventListener('mouseup', async (e) => {
+    function snipPointerDown(e) {
+        if (e.button === 2) {
+            stopSnippingMode();
+            return;
+        }
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (!e.isPrimary) return;
+
+        e.preventDefault();
+        isSelectingRect = true;
+        snipStart = { x: e.clientX, y: e.clientY };
+        snipRect = { x: e.clientX, y: e.clientY, w: 0, h: 0 };
+
+        snipFullDim.style.display = 'none';
+        snipSelectionBox.style.display = 'block';
+        snipSelectionBox.style.left = `${e.clientX}px`;
+        snipSelectionBox.style.top = `${e.clientY}px`;
+        snipSelectionBox.style.width = '0px';
+        snipSelectionBox.style.height = '0px';
+
+        try { snipOverlay.setPointerCapture(e.pointerId); } catch (_) {}
+    }
+
+    function snipPointerMove(e) {
         if (!isSelectingRect) return;
+        e.preventDefault();
+
+        const x = Math.min(snipStart.x, e.clientX);
+        const y = Math.min(snipStart.y, e.clientY);
+        const w = Math.abs(e.clientX - snipStart.x);
+        const h = Math.abs(e.clientY - snipStart.y);
+        snipUpdateBox(x, y, w, h);
+    }
+
+    async function snipPointerUp(e) {
+        if (!isSelectingRect) return;
+        e.preventDefault();
+
+        try { snipOverlay.releasePointerCapture(e.pointerId); } catch (_) {}
+
         const rect = { ...snipRect };
         stopSnippingMode();
 
         if (rect.w < 12 || rect.h < 12) return;
 
         try {
-            await captureAreaToClipboard4K(rect);
+            await smartCaptureArea4K(rect);
         } catch (err) {
             console.error('Ошибка создания скриншота:', err);
-            showToast('Ошибка копирования (проверь локальный сервер)');
+            showToast('Ошибка копирования');
+        }
+    }
+
+    snipOverlay.addEventListener('pointerdown', snipPointerDown);
+    snipOverlay.addEventListener('pointermove', snipPointerMove);
+    snipOverlay.addEventListener('pointerup', snipPointerUp);
+    snipOverlay.addEventListener('pointercancel', (e) => {
+        if (isSelectingRect) {
+            stopSnippingMode();
         }
     });
-
     snipOverlay.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         stopSnippingMode();
     });
 
-    // Вспомогательная функция отрисовки текста с точным letterSpacing как в CSS
     function drawTrackedText(ctx, text, x, y, letterSpacingPx) {
         if (!letterSpacingPx || letterSpacingPx === 0) {
             ctx.fillText(text, x, y);
@@ -1771,14 +2258,57 @@
         ctx.textAlign = prevAlign;
     }
 
+    async function smartCaptureArea4K(rect) {
+        const MIN_ZOOM_FOR_DETAIL = 12;
+        const SMART_ZOOM_DURATION = 120;
+
+        const areaSize = Math.max(rect.w, rect.h);
+        const needsSmartZoom = map.getZoom() < MIN_ZOOM_FOR_DETAIL && areaSize < 600;
+
+        if (needsSmartZoom) {
+            const savedCenter = map.getCenter();
+            const savedZoom = map.getZoom();
+
+            const targetZoom = Math.min(18, Math.max(MIN_ZOOM_FOR_DETAIL + 2, map.getZoom() + 4));
+            const centerX = rect.x + rect.w / 2;
+            const centerY = rect.y + rect.h / 2;
+            const targetLngLat = map.unproject([centerX, centerY]);
+
+            map.jumpTo({ center: targetLngLat, zoom: targetZoom });
+
+            await new Promise(resolve => map.once('render', resolve));
+            await new Promise(resolve => setTimeout(resolve, SMART_ZOOM_DURATION));
+
+            const result = await captureAreaToClipboard4K(rect);
+
+            map.jumpTo({ center: savedCenter, zoom: savedZoom });
+
+            showToast(`Скопировано (умный зум ${targetZoom.toFixed(1)})`);
+
+            return result;
+        }
+
+        return await captureAreaToClipboard4K(rect);
+    }
+
     async function captureAreaToClipboard4K(rect) {
         showToast('Рендер в 4K...');
 
-        // Гарантируем, что шрифт CustomArial полностью загружен перед отрисовкой на Canvas
+        const savedOsmState = OSM_LABEL_LAYERS.map(id => ({
+            id,
+            vis: map.getLayer(id) ? map.getLayoutProperty(id, 'visibility') : 'none'
+        }));
+
+        OSM_LABEL_LAYERS.forEach(id => {
+            if (map.getLayer(id)) {
+                try { map.setLayoutProperty(id, 'visibility', 'none'); } catch(_) {}
+            }
+        });
+
         if (document.fonts && document.fonts.ready) {
             await document.fonts.ready;
         }
-        updateMarkersVisibility();
+        forceCustomMarkersVisible();
 
         map.triggerRepaint();
         await new Promise(resolve => map.once('render', resolve));
@@ -1798,7 +2328,6 @@
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
-        // 1. Подложка карты из WebGL Canvas
         const canvasScaleX = mapCanvas.width / cssWidth;
         const canvasScaleY = mapCanvas.height / cssHeight;
 
@@ -1818,7 +2347,6 @@
         ctx.scale(target4kScale, target4kScale);
         ctx.translate(-rect.x, -rect.y);
 
-        // 2. Рисуем ТОЛЬКО реально видимые на экране подписи НП с их точными CSS-параметрами
         if (appSettings.showLabels) {
             markers.forEach(item => {
                 if (item.element.classList.contains('marker-hidden')) return;
@@ -1832,7 +2360,6 @@
                 const p = item.place;
                 const computed = window.getComputedStyle(item.labelEl);
 
-                // Точка города/села (4px с белой обводкой 1px)
                 if (p.dot) {
                     ctx.beginPath();
                     ctx.arc(pos.x, pos.y, 1.5, 0, Math.PI * 2);
@@ -1857,11 +2384,9 @@
                 const textX = p.dot ? pos.x + 6 : pos.x;
                 const textY = p.dot ? pos.y + 4 : pos.y;
 
-                // Белая тень текста (смещение 1.5px, 1.5px как в CSS ::after)
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
                 drawTrackedText(ctx, text, textX + 1.5, textY + 1.5, letterSpacing);
 
-                // Основной текст
                 ctx.fillStyle = color;
                 drawTrackedText(ctx, text, textX, textY, letterSpacing);
             });
@@ -1922,36 +2447,273 @@
 
         ctx.restore();
 
-        // 4. Копируем готовый PNG в буфер обмена
+        const dScale = appSettings.disclaimerScale / 100;
+        const dWidth = 320 * dScale;
+        const dPad = 16;
+
+        const dCanvas = document.createElement('canvas');
+        dCanvas.width = Math.ceil((dWidth + dPad * 2) * target4kScale);
+        dCanvas.height = Math.ceil(400 * target4kScale);
+        const dCtx = dCanvas.getContext('2d');
+        dCtx.scale(target4kScale, target4kScale);
+        dCtx.translate(dPad, dPad);
+        dCtx.fillStyle = '#ffffff';
+        dCtx.strokeStyle = '#000000';
+        dCtx.lineWidth = 1.3;
+        
+        dCtx.font = '13px Arial, sans-serif';
+        dCtx.fillStyle = '#1f2937';
+        dCtx.textBaseline = 'top';
+        dCtx.textAlign = 'left';
+        
+        const pad = 14;
+        const maxWidth = dWidth - pad * 2;
+        const words = appSettings.disclaimerText.split(' ');
+        let line = '';
+        let lineY = pad;
+        const lineHeight = 13 * 1.4;
+
+        for (let i = 0; i < words.length; i++) {
+            const testLine = line + words[i] + ' ';
+            const metrics = dCtx.measureText(testLine);
+            if (metrics.width > maxWidth && line !== '') {
+                dCtx.fillText(line.trim(), pad, lineY);
+                line = words[i] + ' ';
+                lineY += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        if (line.trim()) {
+            dCtx.fillText(line.trim(), pad, lineY);
+            lineY += lineHeight;
+        }
+
+        lineY += 4;
+        dCtx.beginPath();
+        dCtx.strokeStyle = '#e5e7eb';
+        dCtx.lineWidth = 1;
+        dCtx.moveTo(pad, lineY);
+        dCtx.lineTo(dWidth - pad, lineY);
+        dCtx.stroke();
+        lineY += 4;
+
+        const bounds = map.getBounds();
+        const uniqueUnits = new Map();
+        spawnedUnits.forEach(unit => {
+            const lngLat = unit.marker.getLngLat();
+            if (bounds.contains(lngLat)) {
+                if (!uniqueUnits.has(unit.label)) {
+                    uniqueUnits.set(unit.label, { file: unit.file, label: unit.label });
+                }
+            }
+        });
+
+        if (uniqueUnits.size === 0) {
+            dCtx.font = 'italic 12px Arial, sans-serif';
+            dCtx.fillStyle = '#9ca3af';
+            dCtx.fillText('Нет объектов в кадре', pad, lineY);
+            lineY += 16;
+        } else {
+            let itemX = pad;
+            const iconSize = 20;
+            const gap = 10;
+
+            uniqueUnits.forEach((data) => {
+                const img = new Image();
+                img.src = `./icons/${data.file}`;
+                img.alt = data.label;
+
+                dCtx.font = '600 13px Arial, sans-serif';
+                const textW = dCtx.measureText(data.label).width;
+                const totalW = iconSize + 6 + textW;
+
+                if (itemX + totalW > dWidth - pad) {
+                    itemX = pad;
+                    lineY += 22;
+                }
+
+                if (img.complete && img.naturalWidth > 0) {
+                    const aspect = img.naturalHeight / img.naturalWidth;
+                    let drawW = iconSize;
+                    let drawH = iconSize * aspect;
+                    if (drawW > iconSize) {
+                        drawW = iconSize;
+                        drawH = iconSize * aspect;
+                    }
+                    if (drawH > iconSize) {
+                        drawH = iconSize;
+                        drawW = iconSize / aspect;
+                    }
+                    const offsetX = (iconSize - drawW) / 2;
+                    const offsetY = (iconSize - drawH) / 2;
+                    dCtx.drawImage(img, itemX + offsetX, lineY + offsetY, drawW, drawH);
+                }
+
+                dCtx.fillStyle = '#374151';
+                dCtx.textBaseline = 'middle';
+                dCtx.fillText(data.label, itemX + iconSize + 6, lineY + iconSize / 2);
+
+                itemX += totalW + gap;
+            });
+        }
+
+        lineY += 16;
+
+        const totalH = lineY + pad;
+        dCanvas.height = Math.ceil((totalH + dPad * 2) * target4kScale);
+
+        dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+        dCtx.save();
+        dCtx.scale(target4kScale, target4kScale);
+        dCtx.translate(dPad, dPad);
+
+        dCtx.fillStyle = '#ffffff';
+        dCtx.strokeStyle = '#000000';
+        dCtx.lineWidth = 1.3;
+        dCtx.beginPath();
+        const r = 5;
+        const x0 = 0, y0 = 0, w0 = dWidth, h0 = totalH;
+        dCtx.moveTo(x0 + r, y0);
+        dCtx.lineTo(x0 + w0 - r, y0);
+        dCtx.quadraticCurveTo(x0 + w0, y0, x0 + w0, y0 + r);
+        dCtx.lineTo(x0 + w0, y0 + h0 - r);
+        dCtx.quadraticCurveTo(x0 + w0, y0 + h0, x0 + w0 - r, y0 + h0);
+        dCtx.lineTo(x0 + r, y0 + h0);
+        dCtx.quadraticCurveTo(x0, y0 + h0, x0, y0 + h0 - r);
+        dCtx.lineTo(x0, y0 + r);
+        dCtx.quadraticCurveTo(x0, y0, x0 + r, y0);
+        dCtx.closePath();
+        dCtx.fill();
+        dCtx.stroke();
+
+        dCtx.fillStyle = '#1f2937';
+        dCtx.textBaseline = 'top';
+        dCtx.textAlign = 'left';
+        dCtx.font = '13px Arial, sans-serif';
+
+        let recY = pad;
+        const recWords = appSettings.disclaimerText.split(' ');
+        let recLine = '';
+        
+        for (let i = 0; i < recWords.length; i++) {
+            const testLine = recLine + recWords[i] + ' ';
+            const metrics = dCtx.measureText(testLine);
+            if (metrics.width > maxWidth && recLine !== '') {
+                dCtx.fillText(recLine.trim(), pad, recY);
+                recLine = recWords[i] + ' ';
+                recY += lineHeight;
+            } else {
+                recLine = testLine;
+            }
+        }
+        if (recLine.trim()) {
+            dCtx.fillText(recLine.trim(), pad, recY);
+            recY += lineHeight;
+        }
+
+        recY += 4;
+        dCtx.beginPath();
+        dCtx.strokeStyle = '#e5e7eb';
+        dCtx.lineWidth = 1;
+        dCtx.moveTo(pad, recY);
+        dCtx.lineTo(dWidth - pad, recY);
+        dCtx.stroke();
+        recY += 4;
+
+        if (uniqueUnits.size === 0) {
+            dCtx.font = 'italic 12px Arial, sans-serif';
+            dCtx.fillStyle = '#9ca3af';
+            dCtx.fillText('Нет объектов в кадре', pad, recY);
+        } else {
+            let itemX = pad;
+            const iconSize = 20;
+            const gap = 10;
+
+            uniqueUnits.forEach((data) => {
+                const img = new Image();
+                img.src = `./icons/${data.file}`;
+                img.alt = data.label;
+
+                dCtx.font = '600 13px Arial, sans-serif';
+                const textW = dCtx.measureText(data.label).width;
+                const totalW = iconSize + 6 + textW;
+
+                if (itemX + totalW > dWidth - pad) {
+                    itemX = pad;
+                    recY += 22;
+                }
+
+                if (img.complete && img.naturalWidth > 0) {
+                    const aspect = img.naturalHeight / img.naturalWidth;
+                    let drawW = iconSize;
+                    let drawH = iconSize * aspect;
+                    if (drawH > iconSize) {
+                        drawH = iconSize;
+                        drawW = iconSize / aspect;
+                    }
+                    const offsetX = (iconSize - drawW) / 2;
+                    const offsetY = (iconSize - drawH) / 2;
+                    dCtx.drawImage(img, itemX + offsetX, recY + offsetY, drawW, drawH);
+                }
+
+                dCtx.fillStyle = '#374151';
+                dCtx.textBaseline = 'middle';
+                dCtx.fillText(data.label, itemX + iconSize + 6, recY + iconSize / 2);
+
+                itemX += totalW + gap;
+            });
+        }
+
+        dCtx.restore();
+
+        const destX = 16;
+        const destY = outCanvas.height - dCanvas.height - 16;
+        ctx.drawImage(dCanvas, destX, destY);
+
         const blob = await new Promise(resolve => outCanvas.toBlob(resolve, 'image/png'));
         if (!blob) throw new Error('Не удалось сформировать PNG');
 
-        await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-        ]);
+        try {
+            await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+            ]);
+            showToast(`Скопировано в буфер (${outCanvas.width}×${outCanvas.height})`);
+        } catch (err) {
+            const link = document.createElement('a');
+            link.download = `map-${Date.now()}.png`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            showToast(`Сохранено (${outCanvas.width}×${outCanvas.height})`);
+        }
 
-        showToast(`Скопировано в буфер (${outCanvas.width}×${outCanvas.height})`);
+        savedOsmState.forEach(({id, vis}) => {
+            if (map.getLayer(id) && vis) {
+                try { map.setLayoutProperty(id, 'visibility', vis); } catch(_) {}
+            }
+        });
+        osmLabelsVisible = null;
+        updateOsmLabelsVisibility();
+        updateMarkersVisibility();
+
+        return blob;
     }
 
-    /* ================= ПРИМЕНЕНИЕ НАСТРОЕК К КАРТЕ И UI ================= */
     function applyAllSettingsToMap() {
         if (map && map.triggerRepaint) {
             map.triggerRepaint();
         }
 
-        // Обновляем размер всех заспавненных объектов
         spawnedUnits.forEach(u => {
             u.img.style.width = `${appSettings.unitSize}px`;
         });
 
-        // Включаем/выключаем класс белой обводки БПЛА
         if (appSettings.unitOutline) {
             document.body.classList.add('unit-outline-enabled');
         } else {
             document.body.classList.remove('unit-outline-enabled');
         }
 
-        // Прозрачность границ
         const factor = appSettings.bordersOpacity / 100;
         Object.entries(BORDER_BASE_OPACITY).forEach(([layerId, baseOp]) => {
             if (map.getLayer(layerId)) {
@@ -1959,7 +2721,6 @@
             }
         });
 
-        // Леса и застройка
         const landcoverVis = appSettings.showLandcover ? 'visible' : 'none';
         ['forest-fill', 'forest-outline', 'forest-points', 'towns-fill', 'towns-outline', 'towns-points'].forEach(layerId => {
             if (map.getLayer(layerId)) {
@@ -1967,7 +2728,26 @@
             }
         });
 
-        // Подписи НП
+        if (map.getLayer('towns-outline')) {
+            map.setPaintProperty('towns-outline', 'line-opacity', appSettings.showTownsBorders ? 0.9 : 0);
+            map.setPaintProperty('towns-outline', 'line-width', appSettings.townsBorderWidth);
+        }
+
+        disclaimerText.textContent = appSettings.disclaimerText;
+        
+        const dScale = appSettings.disclaimerScale / 100;
+        if (window.innerWidth > 768) {
+            disclaimerBlock.style.width = `${320 * dScale}px`;
+            disclaimerBlock.style.padding = `${14 * dScale}px`;
+            disclaimerText.style.fontSize = `${13 * dScale}px`;
+            disclaimerUnits.style.gap = `${6 * dScale}px ${10 * dScale}px`;
+        } else {
+            disclaimerBlock.style.width = `${260 * dScale}px`;
+            disclaimerBlock.style.padding = `${10 * dScale}px ${12 * dScale}px`;
+            disclaimerText.style.fontSize = `${12 * dScale}px`;
+            disclaimerUnits.style.gap = `${4 * dScale}px ${8 * dScale}px`;
+        }
+
         updateMarkersVisibility();
     }
 
@@ -1984,12 +2764,18 @@
     const ctrlBorders = document.getElementById('ctrlBorders');
     const ctrlLabels = document.getElementById('ctrlLabels');
     const ctrlLandcover = document.getElementById('ctrlLandcover');
+    const ctrlTownsBorders = document.getElementById('ctrlTownsBorders');
+    const ctrlTownsBorderWidth = document.getElementById('ctrlTownsBorderWidth');
+    const ctrlDisclaimerText = document.getElementById('ctrlDisclaimerText');
+    const ctrlDisclaimerScale = document.getElementById('ctrlDisclaimerScale');
 
     const valSaturation = document.getElementById('valSaturation');
     const valDarkness = document.getElementById('valDarkness');
     const valShadowFloor = document.getElementById('valShadowFloor');
     const valUnitSize = document.getElementById('valUnitSize');
     const valBorders = document.getElementById('valBorders');
+    const valTownsBorderWidth = document.getElementById('valTownsBorderWidth');
+    const valDisclaimerScale = document.getElementById('valDisclaimerScale');
 
     function syncUiWithSettings() {
         ctrlSaturation.value = appSettings.saturation;
@@ -2011,6 +2797,13 @@
 
         ctrlLabels.checked = appSettings.showLabels;
         ctrlLandcover.checked = appSettings.showLandcover;
+        ctrlTownsBorders.checked = appSettings.showTownsBorders;
+        ctrlTownsBorderWidth.value = appSettings.townsBorderWidth;
+        valTownsBorderWidth.textContent = `${appSettings.townsBorderWidth} px`;
+
+        ctrlDisclaimerText.value = appSettings.disclaimerText;
+        ctrlDisclaimerScale.value = appSettings.disclaimerScale;
+        valDisclaimerScale.textContent = `${appSettings.disclaimerScale}%`;
     }
 
     function openModal() {
@@ -2085,6 +2878,32 @@
 
     ctrlLandcover.addEventListener('change', (e) => {
         appSettings.showLandcover = e.target.checked;
+        saveSettings(appSettings);
+        applyAllSettingsToMap();
+    });
+
+    ctrlTownsBorders.addEventListener('change', (e) => {
+        appSettings.showTownsBorders = e.target.checked;
+        saveSettings(appSettings);
+        applyAllSettingsToMap();
+    });
+
+    ctrlTownsBorderWidth.addEventListener('input', (e) => {
+        appSettings.townsBorderWidth = Number(e.target.value);
+        valTownsBorderWidth.textContent = `${appSettings.townsBorderWidth} px`;
+        saveSettings(appSettings);
+        applyAllSettingsToMap();
+    });
+
+    ctrlDisclaimerText.addEventListener('input', (e) => {
+        appSettings.disclaimerText = e.target.value;
+        saveSettings(appSettings);
+        applyAllSettingsToMap();
+    });
+
+    ctrlDisclaimerScale.addEventListener('input', (e) => {
+        appSettings.disclaimerScale = Number(e.target.value);
+        valDisclaimerScale.textContent = `${appSettings.disclaimerScale}%`;
         saveSettings(appSettings);
         applyAllSettingsToMap();
     });

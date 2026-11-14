@@ -1,20 +1,182 @@
 [
-    { "name": "Шостка", "coords": [33.4698, 51.8630], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Конотоп", "coords": [33.2026, 51.2403], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Ніжин", "coords": [31.8869, 51.0480], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Ромни", "coords": [33.4747, 50.7420], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Охтирка", "coords": [34.8931, 50.3087], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Бердичів", "coords": [28.5999, 49.8903], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Коростень", "coords": [28.6481, 50.9526], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Умань", "coords": [30.2208, 48.7484], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Олександрія", "coords": [33.1091, 48.6685], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Кременчук", "coords": [33.4116, 49.0649], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Ізюм", "coords": [37.2654, 49.2045], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Лозова", "coords": [36.3533, 48.8876], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Павлоград", "coords": [35.8679, 48.5323], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Нікополь", "coords": [34.3976, 47.5750], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Мелітополь", "coords": [35.3695, 46.8501], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Бердянськ", "coords": [36.7860, 46.7583], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Мукачево", "coords": [22.7196, 48.4419], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Ізмаїл", "coords": [28.8351, 45.3464], "type": "ray", "dot": false, "minZoom": 5 }
+    {
+        "name": "Шостка",
+        "coords": [
+            33.4728542,
+            51.864355
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Конотоп",
+        "coords": [
+            33.206675,
+            51.2397495
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Ніжин",
+        "coords": [
+            31.8806289,
+            51.0464747
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Ромни",
+        "coords": [
+            33.4877,
+            50.74207
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Охтирка",
+        "coords": [
+            34.8868923,
+            50.3115386
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Бердичів",
+        "coords": [
+            28.5814912,
+            49.8940442
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Коростень",
+        "coords": [
+            28.6417552,
+            50.9491068
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Умань",
+        "coords": [
+            30.2203052,
+            48.7497621
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Олександрія",
+        "coords": [
+            33.1169742,
+            48.670609
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Кременчук",
+        "coords": [
+            33.403516,
+            49.0629553
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Ізюм",
+        "coords": [
+            37.2784093,
+            49.1913202
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Лозова",
+        "coords": [
+            36.3160254,
+            48.8842428
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Павлоград",
+        "coords": [
+            35.8703695,
+            48.5316759
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Нікополь",
+        "coords": [
+            34.3917272,
+            47.5692061
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Мелітополь",
+        "coords": [
+            35.3827281,
+            46.8467267
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Бердянськ",
+        "coords": [
+            36.7887623,
+            46.755678
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Мукачево",
+        "coords": [
+            22.7185408,
+            48.4421119
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    },
+    {
+        "name": "Ізмаїл",
+        "coords": [
+            28.8361514,
+            45.3511307
+        ],
+        "type": "ray",
+        "dot": false,
+        "minZoom": 5
+    }
 ]

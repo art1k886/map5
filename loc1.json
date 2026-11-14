@@ -1,28 +1,262 @@
 [
-    { "name": "КИЇВ", "coords": [30.5238, 50.4501], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ВІННИЦЯ", "coords": [28.4678, 49.2331], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ЛУЦЬК", "coords": [25.3254, 50.7472], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ДНІПРО", "coords": [35.0462, 48.4647], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ДОНЕЦЬК", "coords": [37.8028, 48.0028], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ЖИТОМИР", "coords": [28.6587, 50.2547], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "УЖГОРОД", "coords": [22.2871, 48.6208], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ЗАПОРІЖЖЯ", "coords": [35.1396, 47.8388], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ІВАНО-ФРАНКІВСЬК", "coords": [24.7097, 48.9226], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "КРОПИВНИЦЬКИЙ", "coords": [32.2623, 48.5042], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ЛУГАНСЬК", "coords": [39.3078, 48.5740], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ЛЬВІВ", "coords": [24.0311, 49.8429], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "МИКОЛАЇВ", "coords": [31.9950, 46.9750], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ОДЕСА", "coords": [30.7233, 46.4825], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ПОЛТАВА", "coords": [34.5514, 49.5883], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "РІВНЕ", "coords": [26.2516, 50.6199], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "СУМИ", "coords": [34.7981, 50.9077], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ТЕРНОПІЛЬ", "coords": [25.5946, 49.5535], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ХАРКІВ", "coords": [36.2304, 49.9935], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ХЕРСОН", "coords": [32.6160, 46.6354], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ХМЕЛЬНИЦЬКИЙ", "coords": [26.9740, 49.4249], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ЧЕРКАСИ", "coords": [32.0597, 49.4444], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ЧЕРНІВЦІ", "coords": [25.9358, 48.2921], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "ЧЕРНІГІВ", "coords": [31.2893, 51.4982], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "СІМФЕРОПОЛЬ", "coords": [34.1103, 44.9521], "type": "obl", "dot": false, "minZoom": 4 },
-    { "name": "СЕВАСТОПОЛЬ", "coords": [33.5227, 44.6166], "type": "obl", "dot": false, "minZoom": 4 }
+    {
+        "name": "КИЇВ",
+        "coords": [
+            30.5241361,
+            50.4500336
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ВІННИЦЯ",
+        "coords": [
+            28.467975,
+            49.2320162
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ЛУЦЬК",
+        "coords": [
+            25.320078,
+            50.7450733
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ДНІПРО",
+        "coords": [
+            35.0417711,
+            48.4680221
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ДОНЕЦЬК",
+        "coords": [
+            37.8013407,
+            48.0158753
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ЖИТОМИР",
+        "coords": [
+            28.6696281,
+            50.2601065
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "УЖГОРОД",
+        "coords": [
+            22.3022572,
+            48.6223731
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ЗАПОРІЖЖЯ",
+        "coords": [
+            35.1182867,
+            47.8507859
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ІВАНО-ФРАНКІВСЬК",
+        "coords": [
+            24.710334,
+            48.9224763
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "КРОПИВНИЦЬКИЙ",
+        "coords": [
+            32.2656283,
+            48.5105805
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ЛУГАНСЬК",
+        "coords": [
+            39.2973153,
+            48.5717084
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ЛЬВІВ",
+        "coords": [
+            24.0315921,
+            49.841952
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "МИКОЛАЇВ",
+        "coords": [
+            31.9939666,
+            46.9758615
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ОДЕСА",
+        "coords": [
+            30.7322878,
+            46.4843023
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ПОЛТАВА",
+        "coords": [
+            34.5507948,
+            49.5897423
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "РІВНЕ",
+        "coords": [
+            26.2513165,
+            50.6196175
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "СУМИ",
+        "coords": [
+            34.8027723,
+            50.9119775
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ТЕРНОПІЛЬ",
+        "coords": [
+            25.5923753,
+            49.5557908
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ХАРКІВ",
+        "coords": [
+            36.2310146,
+            49.9923181
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ХЕРСОН",
+        "coords": [
+            32.6143922,
+            46.6401295
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ХМЕЛЬНИЦЬКИЙ",
+        "coords": [
+            26.9793793,
+            49.4196404
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ЧЕРКАСИ",
+        "coords": [
+            32.0588085,
+            49.4447056
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ЧЕРНІВЦІ",
+        "coords": [
+            25.9376532,
+            48.2864702
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "ЧЕРНІГІВ",
+        "coords": [
+            31.294332,
+            51.494099
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "СІМФЕРОПОЛЬ",
+        "coords": [
+            34.1024858,
+            44.9521459
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    },
+    {
+        "name": "СЕВАСТОПОЛЬ",
+        "coords": [
+            33.5220842,
+            44.6054434
+        ],
+        "type": "obl",
+        "dot": false,
+        "minZoom": 4
+    }
 ]
