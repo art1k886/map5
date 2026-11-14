@@ -15,8 +15,6 @@
     { "name": "Нікополь", "coords": [34.3976, 47.5750], "type": "ray", "dot": false, "minZoom": 5 },
     { "name": "Мелітополь", "coords": [35.3695, 46.8501], "type": "ray", "dot": false, "minZoom": 5 },
     { "name": "Бердянськ", "coords": [36.7860, 46.7583], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Кам'янець-Подільський", "coords": [26.5856, 48.6800], "type": "ray", "dot": false, "minZoom": 5 },
-    { "name": "Ужгород", "coords": [22.2871, 48.6208], "type": "ray", "dot": false, "minZoom": 5 },
     { "name": "Мукачево", "coords": [22.7196, 48.4419], "type": "ray", "dot": false, "minZoom": 5 },
     { "name": "Ізмаїл", "coords": [28.8351, 45.3464], "type": "ray", "dot": false, "minZoom": 5 }
 ]
