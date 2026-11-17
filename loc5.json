@@ -1,0 +1,592 @@
+[
+    {
+        "name": "Стара Гута",
+        "coords": [
+            33.79669,
+            52.30762
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Усок",
+        "coords": [
+            33.68571,
+            51.90622
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Крупець",
+        "coords": [
+            33.53989,
+            51.92025
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Зноб-Новгородське",
+        "coords": [
+            33.59825,
+            52.26402
+        ],
+        "type": "misto",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Мефедівка",
+        "coords": [
+            33.52306,
+            52.25407
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Голубівка",
+        "coords": [
+            33.79394,
+            52.23827
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Кренидівка",
+        "coords": [
+            33.45989,
+            52.23793
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Очкине",
+        "coords": [
+            33.372,
+            52.22557
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Уралове",
+        "coords": [
+            33.55568,
+            52.18746
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Чернацьке",
+        "coords": [
+            33.92665,
+            52.18019
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Жихове",
+        "coords": [
+            33.69438,
+            52.16583
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Пигарівка",
+        "coords": [
+            33.83308,
+            52.14523
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Глазове",
+        "coords": [
+            33.47225,
+            52.13047
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Вовна",
+        "coords": [
+            33.60889,
+            52.08961
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Бирине",
+        "coords": [
+            33.38264,
+            52.08584
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Каліївка",
+        "coords": [
+            33.54113,
+            52.0631
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Прокопівка",
+        "coords": [
+            33.458,
+            52.05676
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Дорошівка",
+        "coords": [
+            33.85021,
+            52.03459
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Чуйківка",
+        "coords": [
+            34.00474,
+            52.02988
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Свірж",
+        "coords": [
+            33.40805,
+            52.00996
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Білиця",
+        "coords": [
+            33.75687,
+            52.00962
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Антонівка",
+        "coords": [
+            33.58658,
+            52.00275
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Орлівка",
+        "coords": [
+            33.89359,
+            51.93778
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Пирогівка",
+        "coords": [
+            33.28534,
+            51.91494
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Привокзальне",
+        "coords": [
+            33.73867,
+            51.90903
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Імшана",
+        "coords": [
+            33.77881,
+            51.90838
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Ображіївка",
+        "coords": [
+            33.4132,
+            51.90662
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Паліївка",
+        "coords": [
+            33.63449,
+            51.90765
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Миронівка",
+        "coords": [
+            33.5519,
+            51.89941
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Княжичі",
+        "coords": [
+            34.05384,
+            51.88946
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Богданка",
+        "coords": [
+            33.37495,
+            51.86864
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Воздвиженське",
+        "coords": [
+            33.85815,
+            51.86989
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Грем’ячка",
+        "coords": [
+            33.80871,
+            51.86199
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Ковтунове",
+        "coords": [
+            33.40599,
+            51.84448
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Чорні Лози",
+        "coords": [
+            33.35586,
+            51.83658
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Собичеве",
+        "coords": [
+            33.69816,
+            51.81633
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Вільна Слобода",
+        "coords": [
+            34.22928,
+            51.81393
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Заболотне",
+        "coords": [
+            33.28205,
+            51.80706
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Солотвине",
+        "coords": [
+            33.30643,
+            51.80225
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Гукове",
+        "coords": [
+            33.55808,
+            51.80054
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Горіле",
+        "coords": [
+            33.94295,
+            51.79539
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Тиманівка",
+        "coords": [
+            33.12823,
+            51.77171
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Масиків",
+        "coords": [
+            33.40065,
+            51.76767
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Слоут",
+        "coords": [
+            33.79646,
+            51.75997
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Уланове",
+        "coords": [
+            34.30103,
+            51.75899
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Хотминівка",
+        "coords": [
+            33.98586,
+            51.74251
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Годунівка",
+        "coords": [
+            33.95575,
+            51.74191
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Кучерівка",
+        "coords": [
+            34.18842,
+            51.73462
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Береза",
+        "coords": [
+            33.87533,
+            51.73114
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Чапліївка",
+        "coords": [
+            33.21957,
+            51.71539
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Студенок",
+        "coords": [
+            34.12594,
+            51.69239
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Білокопитове",
+        "coords": [
+            34.06311,
+            51.66767
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Заруцьке",
+        "coords": [
+            34.02663,
+            51.65593
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Катеринівка",
+        "coords": [
+            34.09845,
+            51.65047
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Дубовичі",
+        "coords": [
+            33.57971,
+            51.63814
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Некрасове",
+        "coords": [
+            33.86839,
+            51.62161
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Дунаєць",
+        "coords": [
+            33.80596,
+            51.57978
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Богданівка",
+        "coords": [
+            33.33172,
+            51.89527
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    },
+    {
+        "name": "Бачівськ",
+        "coords": [
+            34.27639,
+            51.84505
+        ],
+        "type": "selo",
+        "dot": true,
+        "minZoom": 10.8
+    }
+]

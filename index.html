@@ -238,6 +238,11 @@
             transform: scale(0.95);
         }
 
+        .glass-icon-btn.active {
+            border-color: rgba(96, 165, 250, 0.75);
+            background: linear-gradient(135deg, rgba(38, 52, 74, 0.82), rgba(20, 28, 42, 0.75));
+        }
+
         .glass-icon-btn svg {
             width: 20px;
             height: 20px;
@@ -246,6 +251,181 @@
 
         #openSettingsBtn.active svg {
             transform: rotate(90deg);
+        }
+
+        .unit-sizes-popover {
+            position: fixed;
+            top: 68px;
+            right: 16px;
+            z-index: 950;
+            width: 290px;
+            max-width: calc(100vw - 32px);
+            max-height: calc(100vh - 150px);
+            padding: 14px;
+            border-radius: 20px;
+            color: #f4f6fa;
+            background: linear-gradient(145deg, rgba(34, 38, 46, 0.84), rgba(18, 20, 26, 0.78));
+            backdrop-filter: blur(28px) saturate(185%);
+            -webkit-backdrop-filter: blur(28px) saturate(185%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-top-color: rgba(255, 255, 255, 0.42);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px) scale(0.95);
+            transform-origin: top right;
+            transition: opacity 0.22s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .unit-sizes-popover.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .popover-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .popover-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .popover-reset-all {
+            font-size: 11px;
+            color: rgba(147, 197, 253, 0.9);
+            background: rgba(96, 165, 250, 0.14);
+            border: 1px solid rgba(96, 165, 250, 0.28);
+            padding: 3px 8px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+
+        .popover-reset-all:hover {
+            background: rgba(96, 165, 250, 0.28);
+        }
+
+        .unit-sizes-list {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .unit-sizes-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .unit-sizes-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .unit-size-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 11px;
+            padding: 7px 9px;
+        }
+
+        .unit-size-item-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+
+        .unit-size-info {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-width: 0;
+        }
+
+        .unit-size-info img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            flex-shrink: 0;
+            filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.4));
+        }
+
+        .unit-size-name {
+            font-size: 12px;
+            color: #f2f4f8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .unit-size-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .unit-size-badge {
+            font-size: 11px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 5px;
+            min-width: 42px;
+            text-align: center;
+        }
+
+        .unit-size-badge.custom {
+            background: rgba(96, 165, 250, 0.28);
+            color: #bfdbfe;
+            border: 1px solid rgba(96, 165, 250, 0.4);
+        }
+
+        .unit-size-reset-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .unit-size-reset-btn:hover {
+            background: rgba(255, 95, 95, 0.35);
+            color: #fff;
+        }
+
+        .unit-size-item input[type="range"] {
+            height: 4px;
+        }
+
+        .unit-size-item input[type="range"]::-webkit-slider-thumb {
+            width: 13px;
+            height: 13px;
         }
 
         .spawn-dock-wrapper {
@@ -780,6 +960,7 @@
         }
 
         body.taking-screenshot .top-right-controls,
+        body.taking-screenshot .unit-sizes-popover,
         body.taking-screenshot .spawn-dock-wrapper,
         body.taking-screenshot .maplibregl-ctrl-bottom-left,
         body.taking-screenshot .maplibregl-ctrl-bottom-right,
@@ -812,6 +993,11 @@
                 top: 10px;
                 right: 10px;
                 gap: 8px;
+            }
+            .unit-sizes-popover {
+                top: 56px;
+                right: 10px;
+                width: 270px;
             }
             .glass-icon-btn {
                 width: 38px;
@@ -923,6 +1109,16 @@
 <div id="map"></div>
 
 <div class="top-right-controls">
+    <button class="glass-icon-btn" id="openUnitSizesBtn" title="Индивидуальный размер каждого БПЛА" aria-label="Размеры БПЛА">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"></path>
+            <path d="m14.5 12.5 2-2"></path>
+            <path d="m11.5 9.5 2-2"></path>
+            <path d="m8.5 6.5 2-2"></path>
+            <path d="m17.5 15.5 2-2"></path>
+        </svg>
+    </button>
+
     <button class="glass-icon-btn" id="openSnipBtn" title="Скриншот области в 4K (буфер обмена)" aria-label="Скриншот области">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -936,6 +1132,14 @@
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
     </button>
+</div>
+
+<div class="unit-sizes-popover" id="unitSizesPopover">
+    <div class="popover-header">
+        <span class="popover-title">Размеры по типам БПЛА</span>
+        <button class="popover-reset-all" id="resetCustomUnitSizesBtn" title="Сбросить все индивидуальные размеры">Сброс</button>
+    </div>
+    <div class="unit-sizes-list" id="unitSizesList"></div>
 </div>
 
 <div class="spawn-dock-wrapper">
@@ -1003,7 +1207,7 @@
 
             <div class="control-row">
                 <div class="control-header">
-                    <span>Размер иконок объектов</span>
+                    <span>Размер иконок объектов (общий)</span>
                     <span class="control-val" id="valUnitSize">34 px</span>
                 </div>
                 <input type="range" id="ctrlUnitSize" min="18" max="72" step="2" value="34">
@@ -1063,7 +1267,7 @@
         </div>
 
         <div class="modal-footer">
-            <button class="reset-btn" id="resetSettingsBtn">Сбросить</button>
+            <button class="reset-btn" id="resetSettingsBtn">Сбросить всё</button>
         </div>
     </div>
 </div>
@@ -1071,13 +1275,14 @@
 <script>
     const DEFAULT_DISCLAIMER_TEXT = 'Дані зібрані з відкритих джерел та нанесені вручну. Iнформація може бути неповною або містити похибку. Не використовувати для прийняття рішень щодо безпеки.';
 
-    const STORAGE_KEY = 'karta_np_settings_v5';
+    const STORAGE_KEY = 'karta_np_settings_v6';
 
     const DEFAULT_SETTINGS = {
         saturation: 0,
         darkness: 30,
         shadowFloor: 22,
         unitSize: 34,
+        customUnitScales: {},
         unitOutline: true,
         bordersOpacity: 100,
         showLabels: true,
@@ -1091,10 +1296,15 @@
     function loadSettings() {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return { ...DEFAULT_SETTINGS };
-            return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+            if (!raw) return { ...DEFAULT_SETTINGS, customUnitScales: {} };
+            const parsed = JSON.parse(raw);
+            return {
+                ...DEFAULT_SETTINGS,
+                ...parsed,
+                customUnitScales: parsed.customUnitScales || {}
+            };
         } catch (e) {
-            return { ...DEFAULT_SETTINGS };
+            return { ...DEFAULT_SETTINGS, customUnitScales: {} };
         }
     }
 
@@ -1105,6 +1315,14 @@
     }
 
     let appSettings = loadSettings();
+
+    function getEffectiveUnitSize(file) {
+        const scale = appSettings.customUnitScales[file];
+        if (typeof scale === 'number' && !isNaN(scale)) {
+            return Math.max(10, Math.round(appSettings.unitSize * scale));
+        }
+        return appSettings.unitSize;
+    }
 
     const UNIT_CATALOG = [
         { file: 'шахед.png', label: 'Шахед' },
@@ -1207,7 +1425,7 @@
         return townsData;
     }
 
-    function addGeoJsonLayer(map, name, dataOrUrl, color, beforeId, useZoomFilter) {
+    function addGeoJsonLayer(map, name, dataOrUrl, color, beforeId, useZoomFilter, layerMinZoom) {
         const dataPromise = typeof dataOrUrl === 'string'
             ? fetch(dataOrUrl).then(r => {
                 if (!r.ok) throw new Error(`HTTP ${r.status} при загрузке ${dataOrUrl}`);
@@ -1234,9 +1452,10 @@
                     }
                 };
                 if (zoomFilter) fillLayer.filter = zoomFilter;
+                if (layerMinZoom !== undefined) fillLayer.minzoom = layerMinZoom;
                 map.addLayer(fillLayer, beforeId);
 
-                const isTowns = name === 'towns';
+                const isTowns = name === 'towns' || name === 'villages';
                 const outlineColor = isTowns ? darkenHex(color, 25) : color;
                 const outlineLayer = {
                     id: `${name}-outline`,
@@ -1250,13 +1469,14 @@
                     }
                 };
                 if (zoomFilter) outlineLayer.filter = zoomFilter;
+                if (layerMinZoom !== undefined) outlineLayer.minzoom = layerMinZoom;
                 map.addLayer(outlineLayer, beforeId);
 
                 const pointsFilter = zoomFilter
                     ? ['all', ['==', ['geometry-type'], 'Point'], zoomFilter]
                     : ['==', ['geometry-type'], 'Point'];
 
-                map.addLayer({
+                const pointsLayer = {
                     id: `${name}-points`,
                     type: 'circle',
                     source: name,
@@ -1268,7 +1488,9 @@
                         'circle-stroke-color': '#ffffff',
                         'circle-stroke-width': 0.5
                     }
-                }, beforeId);
+                };
+                if (layerMinZoom !== undefined) pointsLayer.minzoom = layerMinZoom;
+                map.addLayer(pointsLayer, beforeId);
             })
             .catch(err => console.error(`Ошибка слоя ${name}:`, err));
     }
@@ -1280,7 +1502,7 @@
         'ukraine-line': 1.0
     };
 
-    function addLineLayer(map, name, url, color, width, opacity, beforeId) {
+    function addLineLayer(map, name, url, color, width, opacity, beforeId, minZoom) {
         return fetch(url)
             .then(r => {
                 if (!r.ok) throw new Error(`HTTP ${r.status} при загрузке ${url}`);
@@ -1293,7 +1515,7 @@
                 const layerId = `${name}-line`;
                 const factor = BORDER_BASE_OPACITY[layerId] !== undefined ? (appSettings.bordersOpacity / 100) : 1;
 
-                map.addLayer({
+                const layerDef = {
                     id: layerId,
                     type: 'line',
                     source: name,
@@ -1306,7 +1528,12 @@
                         'line-width': width,
                         'line-opacity': opacity * factor
                     }
-                }, beforeId);
+                };
+                if (minZoom !== undefined) {
+                    layerDef.minzoom = minZoom;
+                }
+
+                map.addLayer(layerDef, beforeId);
             })
             .catch(err => console.error(`Ошибка линейного слоя ${name}:`, err));
     }
@@ -1655,7 +1882,7 @@
         });
     }
 
-    const files = ['./loc1.json', './loc2.json', './loc3.json', './loc4.json'];
+    const files = ['./loc1.json', './loc2.json', './loc3.json', './loc4.json', './loc5.json'];
 
     const placesPromise = Promise.all(
         files.map(file =>
@@ -1664,7 +1891,17 @@
                     if (!response.ok) throw new Error(`HTTP ${response.status} — ${file}`);
                     return response.json();
                 })
-                .then(data => Array.isArray(data) ? data : [data])
+                .then(data => {
+                    const arr = Array.isArray(data) ? data : [data];
+                    if (file.includes('loc5.json')) {
+                        arr.forEach(p => {
+                            if (p) {
+                                p.minZoom = 10.0;
+                            }
+                        });
+                    }
+                    return arr;
+                })
                 .catch(err => {
                     console.error(`Не удалось загрузить ${file}:`, err);
                     return [];
@@ -1715,9 +1952,30 @@
             placesPromise
         ]).then(([townsData, allPlaces]) => bindTownsMinZoom(townsData, allPlaces));
 
+        const villagesPromise = fetch('./village.geojson')
+            .then(r => {
+                if (!r.ok) return fetch('./villages.geojson');
+                return r;
+            })
+            .then(r => {
+                if (!r.ok) throw new Error(`HTTP ${r.status} при загрузке ./village.geojson`);
+                return r.json();
+            })
+            .then(villagesData => {
+                if (villagesData && Array.isArray(villagesData.features)) {
+                    villagesData.features.forEach(f => {
+                        if (!f.properties) f.properties = {};
+                        f.properties.minZoom = 10.0;
+                    });
+                }
+                return villagesData;
+            });
+
         addGeoJsonLayer(map, 'forest', './forest.geojson', '#cae1c4', firstSymbolId, false)
             .then(() => townsPromise)
             .then(boundTowns => addGeoJsonLayer(map, 'towns', boundTowns, '#ede0d0', firstSymbolId, true))
+            .then(() => villagesPromise)
+            .then(boundVillages => addGeoJsonLayer(map, 'villages', boundVillages, '#ede0d0', firstSymbolId, true, 10.0))
             .then(() => fetch('./ukraine.geojson').then(r => {
                 if (!r.ok) throw new Error(`HTTP ${r.status} при загрузке ./ukraine.geojson`);
                 return r.json();
@@ -1726,6 +1984,7 @@
                 const outsideOsmLayer = createOutsideOsmLayer(ukraineData);
                 map.addLayer(outsideOsmLayer, firstSymbolId);
             })
+            .then(() => addLineLayer(map, 'doroga', './doroga.geojson', '#CED0CF', 1.4, 1, firstSymbolId, 10.0))
             .then(() => addLineLayer(map, 'traca', './traca.geojson', '#CED0CF', 1.4, 1, firstSymbolId))
             .then(() => addLineLayer(map, 'gromady', './gromady.geojson', '#e01b1b', 0.3, 0.2, firstSymbolId))
             .then(() => addLineLayer(map, 'rayony_ukrainy', './rayony_ukrainy.geojson', '#e01b1b', 0.9, 0.2, firstSymbolId))
@@ -1854,7 +2113,7 @@
         img.src = `./icons/${item.file}`;
         img.alt = item.label;
         img.draggable = false;
-        img.style.width = `${appSettings.unitSize}px`;
+        img.style.width = `${getEffectiveUnitSize(item.file)}px`;
         img.style.height = 'auto';
 
         const badge = document.createElement('div');
@@ -2094,6 +2353,117 @@
         spawnDock.appendChild(btn);
     });
 
+    const openUnitSizesBtn = document.getElementById('openUnitSizesBtn');
+    const unitSizesPopover = document.getElementById('unitSizesPopover');
+    const unitSizesList = document.getElementById('unitSizesList');
+    const resetCustomUnitSizesBtn = document.getElementById('resetCustomUnitSizesBtn');
+
+    function renderUnitSizesPopover() {
+        unitSizesList.innerHTML = '';
+        UNIT_CATALOG.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'unit-size-item';
+
+            const top = document.createElement('div');
+            top.className = 'unit-size-item-top';
+
+            const info = document.createElement('div');
+            info.className = 'unit-size-info';
+
+            const img = document.createElement('img');
+            img.src = `./icons/${item.file}`;
+            img.alt = item.label;
+
+            const name = document.createElement('span');
+            name.className = 'unit-size-name';
+            name.textContent = item.label;
+
+            info.appendChild(img);
+            info.appendChild(name);
+
+            const right = document.createElement('div');
+            right.className = 'unit-size-controls-right';
+
+            const hasCustom = typeof appSettings.customUnitScales[item.file] === 'number';
+            const currentPx = getEffectiveUnitSize(item.file);
+
+            const badge = document.createElement('span');
+            badge.className = 'unit-size-badge' + (hasCustom ? ' custom' : '');
+            badge.textContent = `${currentPx}px`;
+
+            const resetSingle = document.createElement('button');
+            resetSingle.className = 'unit-size-reset-btn';
+            resetSingle.title = 'Сбросить к общему размеру';
+            resetSingle.textContent = '×';
+            resetSingle.style.visibility = hasCustom ? 'visible' : 'hidden';
+
+            right.appendChild(badge);
+            right.appendChild(resetSingle);
+
+            top.appendChild(info);
+            top.appendChild(right);
+
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = '12';
+            slider.max = '96';
+            slider.step = '1';
+            slider.value = String(currentPx);
+
+            slider.addEventListener('input', (e) => {
+                const targetPx = Number(e.target.value);
+                appSettings.customUnitScales[item.file] = targetPx / appSettings.unitSize;
+                saveSettings(appSettings);
+                badge.textContent = `${targetPx}px`;
+                badge.classList.add('custom');
+                resetSingle.style.visibility = 'visible';
+                applyAllSettingsToMap(false);
+            });
+
+            resetSingle.addEventListener('click', () => {
+                delete appSettings.customUnitScales[item.file];
+                saveSettings(appSettings);
+                const defPx = appSettings.unitSize;
+                slider.value = String(defPx);
+                badge.textContent = `${defPx}px`;
+                badge.classList.remove('custom');
+                resetSingle.style.visibility = 'hidden';
+                applyAllSettingsToMap(false);
+            });
+
+            row.appendChild(top);
+            row.appendChild(slider);
+            unitSizesList.appendChild(row);
+        });
+    }
+
+    openUnitSizesBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = unitSizesPopover.classList.toggle('open');
+        openUnitSizesBtn.classList.toggle('active', isOpen);
+        if (isOpen) {
+            if (backdrop.classList.contains('open')) closeModal();
+            renderUnitSizesPopover();
+        }
+    });
+
+    resetCustomUnitSizesBtn.addEventListener('click', () => {
+        appSettings.customUnitScales = {};
+        saveSettings(appSettings);
+        renderUnitSizesPopover();
+        applyAllSettingsToMap(false);
+        showToast('Индивидуальные размеры сброшены');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (unitSizesPopover.classList.contains('open') &&
+            !unitSizesPopover.contains(e.target) &&
+            !openUnitSizesBtn.contains(e.target)) {
+            unitSizesPopover.classList.remove('open');
+            openUnitSizesBtn.classList.remove('active');
+        }
+    });
+
     const openSnipBtn = document.getElementById('openSnipBtn');
     const snipOverlay = document.getElementById('snipOverlay');
     const snipFullDim = document.getElementById('snipFullDim');
@@ -2118,6 +2488,10 @@
 
     function startSnippingMode() {
         if (backdrop.classList.contains('open')) closeModal();
+        if (unitSizesPopover.classList.contains('open')) {
+            unitSizesPopover.classList.remove('open');
+            openUnitSizesBtn.classList.remove('active');
+        }
         isSnippingMode = true;
         isSelectingRect = false;
         document.body.classList.add('taking-screenshot');
@@ -2139,8 +2513,12 @@
     openSnipBtn.addEventListener('click', startSnippingMode);
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isSnippingMode) {
-            stopSnippingMode();
+        if (e.key === 'Escape') {
+            if (isSnippingMode) stopSnippingMode();
+            if (unitSizesPopover.classList.contains('open')) {
+                unitSizesPopover.classList.remove('open');
+                openUnitSizesBtn.classList.remove('active');
+            }
         }
         if ((e.altKey && (e.key === 's' || e.key === 'S' || e.key === 'ы' || e.key === 'Ы')) || e.key === 'PrintScreen') {
             e.preventDefault();
@@ -2397,7 +2775,7 @@
             const img = unit.img;
             if (!img.complete || img.naturalWidth === 0) return;
 
-            const drawW = appSettings.unitSize;
+            const drawW = getEffectiveUnitSize(unit.file);
             const aspect = img.naturalHeight / img.naturalWidth;
             const drawH = drawW * aspect;
 
@@ -2699,14 +3077,18 @@
         return blob;
     }
 
-    function applyAllSettingsToMap() {
+    function applyAllSettingsToMap(refreshPopover = true) {
         if (map && map.triggerRepaint) {
             map.triggerRepaint();
         }
 
         spawnedUnits.forEach(u => {
-            u.img.style.width = `${appSettings.unitSize}px`;
+            u.img.style.width = `${getEffectiveUnitSize(u.file)}px`;
         });
+
+        if (refreshPopover && unitSizesPopover.classList.contains('open')) {
+            renderUnitSizesPopover();
+        }
 
         if (appSettings.unitOutline) {
             document.body.classList.add('unit-outline-enabled');
@@ -2722,7 +3104,7 @@
         });
 
         const landcoverVis = appSettings.showLandcover ? 'visible' : 'none';
-        ['forest-fill', 'forest-outline', 'forest-points', 'towns-fill', 'towns-outline', 'towns-points'].forEach(layerId => {
+        ['forest-fill', 'forest-outline', 'forest-points', 'towns-fill', 'towns-outline', 'towns-points', 'villages-fill', 'villages-outline', 'villages-points'].forEach(layerId => {
             if (map.getLayer(layerId)) {
                 map.setLayoutProperty(layerId, 'visibility', landcoverVis);
             }
@@ -2731,6 +3113,10 @@
         if (map.getLayer('towns-outline')) {
             map.setPaintProperty('towns-outline', 'line-opacity', appSettings.showTownsBorders ? 0.9 : 0);
             map.setPaintProperty('towns-outline', 'line-width', appSettings.townsBorderWidth);
+        }
+        if (map.getLayer('villages-outline')) {
+            map.setPaintProperty('villages-outline', 'line-opacity', appSettings.showTownsBorders ? 0.9 : 0);
+            map.setPaintProperty('villages-outline', 'line-width', appSettings.townsBorderWidth);
         }
 
         disclaimerText.textContent = appSettings.disclaimerText;
@@ -2807,6 +3193,10 @@
     }
 
     function openModal() {
+        if (unitSizesPopover.classList.contains('open')) {
+            unitSizesPopover.classList.remove('open');
+            openUnitSizesBtn.classList.remove('active');
+        }
         backdrop.classList.add('open');
         openBtn.classList.add('active');
     }
@@ -2909,7 +3299,7 @@
     });
 
     resetBtn.addEventListener('click', () => {
-        appSettings = { ...DEFAULT_SETTINGS };
+        appSettings = { ...DEFAULT_SETTINGS, customUnitScales: {} };
         saveSettings(appSettings);
         syncUiWithSettings();
         applyAllSettingsToMap();
