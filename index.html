@@ -198,6 +198,165 @@
             opacity: 1;
         }
 
+        .speed-popover {
+            position: fixed;
+            z-index: 1500;
+            width: 236px;
+            padding: 12px;
+            border-radius: 16px;
+            color: #f4f6fa;
+            background: linear-gradient(145deg, rgba(32, 36, 44, 0.9), rgba(16, 18, 24, 0.86));
+            backdrop-filter: blur(26px) saturate(180%);
+            -webkit-backdrop-filter: blur(26px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-top-color: rgba(255, 255, 255, 0.42);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .speed-popover.open {
+            display: flex;
+        }
+
+        .speed-popover-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .speed-popover-close {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .speed-field-label {
+            font-size: 10.5px;
+            color: rgba(255, 255, 255, 0.65);
+            margin-bottom: -4px;
+        }
+
+        .speed-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 10px;
+            padding: 6px 10px;
+        }
+
+        .speed-input-wrap:focus-within {
+            border-color: rgba(96, 165, 250, 0.8);
+        }
+
+        .speed-input-wrap input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .speed-input-wrap input[type="number"]::-webkit-inner-spin-button,
+        .speed-input-wrap input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .speed-input-unit {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.55);
+            white-space: nowrap;
+        }
+
+        .speed-presets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+
+        .speed-preset-btn {
+            padding: 4px 0;
+            border-radius: 7px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.85);
+            font-family: inherit;
+            font-size: 10.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .speed-preset-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .speed-dist-hint {
+            font-size: 10.5px;
+            color: rgba(255, 255, 255, 0.65);
+            text-align: center;
+        }
+
+        .speed-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .speed-btn-apply {
+            flex: 1;
+            padding: 6px 10px;
+            border-radius: 9px;
+            border: 1px solid rgba(96, 165, 250, 0.45);
+            background: rgba(59, 130, 246, 0.35);
+            color: #fff;
+            font-family: inherit;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .speed-btn-apply:hover {
+            background: rgba(59, 130, 246, 0.55);
+        }
+
+        .speed-btn-clear {
+            padding: 6px 10px;
+            border-radius: 9px;
+            border: 1px solid rgba(255, 95, 95, 0.32);
+            background: rgba(239, 68, 68, 0.22);
+            color: #fecaca;
+            font-family: inherit;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .speed-btn-clear:hover {
+            background: rgba(239, 68, 68, 0.4);
+        }
+
         .top-right-controls {
             position: fixed;
             top: 16px;
@@ -456,7 +615,7 @@
                 0 12px 32px rgba(0, 0, 0, 0.45),
                 inset 0 1px 1px rgba(255, 255, 255, 0.28);
             overflow-x: auto;
-            overflow-y: hidden;
+            overflow-y: visible;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
             touch-action: pan-x;
@@ -464,6 +623,41 @@
 
         .spawn-dock::-webkit-scrollbar {
             display: none;
+        }
+
+        .spawn-item-group {
+            position: relative;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spawn-sub-menu {
+            position: fixed;
+            bottom: 72px;
+            z-index: 940;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 6px;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(34, 38, 46, 0.88), rgba(18, 20, 26, 0.82));
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-top-color: rgba(255, 255, 255, 0.42);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px) scale(0.95);
+            transition: opacity 0.18s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .spawn-sub-menu.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
         }
 
         .spawn-item-btn {
@@ -551,9 +745,9 @@
             z-index: 880;
             width: 320px;
             background: #ffffff;
-            border: 1.3px solid #000000;
-            border-radius: 5px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 0.75px solid rgba(0, 0, 0, 0.65);
+            border-radius: 2.5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
             padding: 14px;
             font-family: Arial, sans-serif;
             color: #1f2937;
@@ -586,13 +780,11 @@
             font-size: 13px;
             color: #374151;
             font-weight: 600;
-            height: 24px;
         }
 
         .disclaimer-unit-item img {
             width: auto;
-            height: 20px;
-            max-width: 24px;
+            height: auto;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -958,7 +1150,9 @@
 
         body.taking-screenshot .top-right-controls,
         body.taking-screenshot .unit-sizes-popover,
+        body.taking-screenshot .speed-popover,
         body.taking-screenshot .spawn-dock-wrapper,
+        body.taking-screenshot .spawn-sub-menu,
         body.taking-screenshot .maplibregl-ctrl-bottom-left,
         body.taking-screenshot .maplibregl-ctrl-bottom-right,
         body.taking-screenshot .maplibregl-ctrl-top-left,
@@ -1047,11 +1241,6 @@
             }
             .disclaimer-unit-item {
                 font-size: 11px;
-                height: 20px;
-            }
-            .disclaimer-unit-item img {
-                height: 16px;
-                max-width: 20px;
             }
             .snip-hud {
                 top: 10px;
@@ -1145,13 +1334,42 @@
     <div class="unit-sizes-list" id="unitSizesList"></div>
 </div>
 
+<div class="speed-popover" id="speedPopover">
+    <div class="speed-popover-header">
+        <span id="speedPopoverTitle">Параметры объекта</span>
+        <button class="speed-popover-close" id="speedPopoverClose">&times;</button>
+    </div>
+    <div class="speed-field-label">Подпись в дисклеймере</div>
+    <div class="speed-input-wrap">
+        <input type="text" id="labelInput" maxlength="40" placeholder="Название в дисклеймере">
+    </div>
+    <div class="speed-field-label">Скорость (вектор за 1 мин)</div>
+    <div class="speed-input-wrap">
+        <input type="number" id="speedInput" min="0" max="3000" step="10" placeholder="0">
+        <span class="speed-input-unit">км/ч</span>
+    </div>
+    <div class="speed-presets">
+        <button type="button" class="speed-preset-btn" data-speed="120">120</button>
+        <button type="button" class="speed-preset-btn" data-speed="180">180</button>
+        <button type="button" class="speed-preset-btn" data-speed="480">480</button>
+        <button type="button" class="speed-preset-btn" data-speed="800">800</button>
+    </div>
+    <div class="speed-dist-hint" id="speedDistHint">Дистанция за 1 мин: 0 км</div>
+    <div class="speed-actions">
+        <button type="button" class="speed-btn-apply" id="speedApplyBtn">Применить</button>
+        <button type="button" class="speed-btn-clear" id="speedClearBtn">Сброс</button>
+    </div>
+</div>
+
 <div class="spawn-dock-wrapper">
-    <div class="spawn-dock" id="spawnDock" title="Нажмите для добавления на карту. ЛКМ — двигать, Колёсико — вращать, ПКМ — удалить"></div>
+    <div class="spawn-dock" id="spawnDock" title="ЛКМ — двигать, Колёсико — вращать, СКМ — подпись и скорость, ПКМ — удалить"></div>
     <button class="clear-units-btn" id="clearUnitsBtn" title="Удалить все объекты с карты">
         <span>Очистить</span>
         <span id="unitsCounter">0</span>
     </button>
 </div>
+
+<div class="spawn-sub-menu" id="aviaSubMenu"></div>
 
 <div class="disclaimer-block" id="disclaimerBlock">
     <div class="disclaimer-text" id="disclaimerText"></div>
@@ -1327,6 +1545,11 @@
         return appSettings.unitSize;
     }
 
+    function getDisclaimerIconSize(file) {
+        const base = getEffectiveUnitSize(file);
+        return Math.max(12, Math.min(34, Math.round(base * (20 / 34))));
+    }
+
     const UNIT_CATALOG = [
         { file: 'шахед.png', label: 'Шахед' },
         { file: 'gerbera.png', label: 'Гербера' },
@@ -1340,11 +1563,22 @@
         { file: 'розвіддрон.png', label: 'Розвід.' },
         { file: 'реактивний.png', label: 'Реакт.' },
         { file: 'banderola.png', label: 'Бандероль' },
-        { file: 'avia.png', label: 'Авіа' },
+        { file: 'avia.png', label: 'Су-34', subVariants: [
+            { file: 'avia2.png', label: 'Т/А' },
+            { file: 'avia3.png', label: 'Су-57' }
+        ] },
         { file: 'kab.png', label: 'КАБ' },
         { file: 'bp.png', label: 'БПЛА' },
         { file: 'невідомий.png', label: 'Невідом.' }
     ];
+
+    const ALL_SIZE_UNITS = [];
+    UNIT_CATALOG.forEach(item => {
+        ALL_SIZE_UNITS.push({ file: item.file, label: item.label });
+        if (item.subVariants) {
+            item.subVariants.forEach(sub => ALL_SIZE_UNITS.push({ file: sub.file, label: sub.label }));
+        }
+    });
 
     const CUSTOM_LABELS_MAX_ZOOM = 12;
 
@@ -1922,6 +2156,129 @@
         return [];
     });
 
+    const spawnedUnits = [];
+    let hoveredUnit = null;
+    let spawnCountOffset = 0;
+
+    const unitColorCache = new Map();
+
+    function extractIconDominantColor(img, file) {
+        if (unitColorCache.has(file)) return unitColorCache.get(file);
+        try {
+            const c = document.createElement('canvas');
+            const w = img.naturalWidth || 32;
+            const h = img.naturalHeight || 32;
+            c.width = w;
+            c.height = h;
+            const cx = c.getContext('2d');
+            cx.drawImage(img, 0, 0, w, h);
+            const data = cx.getImageData(0, 0, w, h).data;
+            let rSum = 0, gSum = 0, bSum = 0, count = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                const a = data[i + 3];
+                if (a < 140) continue;
+                const r = data[i], g = data[i + 1], b = data[i + 2];
+                if (r > 240 && g > 240 && b > 240) continue;
+                rSum += r;
+                gSum += g;
+                bSum += b;
+                count++;
+            }
+            if (count > 0) {
+                const r = Math.round(rSum / count);
+                const g = Math.round(gSum / count);
+                const b = Math.round(bSum / count);
+                const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+                unitColorCache.set(file, hex);
+                return hex;
+            }
+        } catch (e) {}
+        return '#e01b1b';
+    }
+
+    function computeDestinationLngLat(lngLat, distanceKm, bearingDeg) {
+        const R = 6371.0;
+        const brng = (bearingDeg * Math.PI) / 180;
+        const lat1 = (lngLat.lat * Math.PI) / 180;
+        const lon1 = (lngLat.lng * Math.PI) / 180;
+        const dByR = distanceKm / R;
+
+        const sinLat1 = Math.sin(lat1);
+        const cosLat1 = Math.cos(lat1);
+        const sinD = Math.sin(dByR);
+        const cosD = Math.cos(dByR);
+
+        const lat2 = Math.asin(sinLat1 * cosD + cosLat1 * sinD * Math.cos(brng));
+        const lon2 = lon1 + Math.atan2(
+            Math.sin(brng) * sinD * cosLat1,
+            cosD - sinLat1 * Math.sin(lat2)
+        );
+
+        return {
+            lng: (lon2 * 180) / Math.PI,
+            lat: (lat2 * 180) / Math.PI
+        };
+    }
+
+    function buildUnitVectorsGeoJSON() {
+        const features = [];
+        for (let i = 0; i < spawnedUnits.length; i++) {
+            const u = spawnedUnits[i];
+            if (!u.speed || u.speed <= 0) continue;
+
+            const start = u.marker.getLngLat();
+            const distKm = u.speed / 60;
+            const bearing = (270 + u.angle) % 360;
+            const end = computeDestinationLngLat(start, distKm, bearing);
+
+            features.push({
+                type: 'Feature',
+                properties: {
+                    color: u.color || '#e01b1b'
+                },
+                geometry: {
+                    type: 'LineString',
+                    coordinates: [
+                        [start.lng, start.lat],
+                        [end.lng, end.lat]
+                    ]
+                }
+            });
+        }
+        return {
+            type: 'FeatureCollection',
+            features
+        };
+    }
+
+    function updateUnitVectorsLayer() {
+        if (!map || !map.getSource('unit-vectors')) return;
+        map.getSource('unit-vectors').setData(buildUnitVectorsGeoJSON());
+    }
+
+    function ensureUnitVectorsLayer() {
+        if (!map || map.getSource('unit-vectors')) return;
+        map.addSource('unit-vectors', {
+            type: 'geojson',
+            data: buildUnitVectorsGeoJSON()
+        });
+        map.addLayer({
+            id: 'unit-vectors-line',
+            type: 'line',
+            source: 'unit-vectors',
+            layout: {
+                'line-cap': 'round',
+                'line-join': 'round'
+            },
+            paint: {
+                'line-color': ['get', 'color'],
+                'line-width': 3.2,
+                'line-opacity': 0.52,
+                'line-dasharray': [2.4, 2.2]
+            }
+        });
+    }
+
     map.on('style.load', () => {
         const layers = map.getStyle().layers;
 
@@ -1993,10 +2350,12 @@
             .then(() => addLineLayer(map, 'rayony_ukrainy', './rayony_ukrainy.geojson', '#e01b1b', 0.9, 0.2, firstSymbolId))
             .then(() => addLineLayer(map, 'regions', './regions.geojson', '#e01b1b', 1.4, 0.9, firstSymbolId))
             .then(() => addLineLayer(map, 'ukraine', './ukraine.geojson', '#e01b1b', 1.6, 1, firstSymbolId))
+            .then(() => ensureUnitVectorsLayer())
             .catch(err => console.error('Ошибка загрузки слоев:', err));
     });
 
     map.on('load', () => {
+        ensureUnitVectorsLayer();
         updateMarkersVisibility();
         updateOsmLabelsVisibility();
         applyAllSettingsToMap();
@@ -2006,19 +2365,126 @@
         updateMarkersVisibility();
     }
 
-    const spawnedUnits = [];
-    let hoveredUnit = null;
-    let spawnCountOffset = 0;
-
     const spawnDock = document.getElementById('spawnDock');
     const clearUnitsBtn = document.getElementById('clearUnitsBtn');
     const unitsCounter = document.getElementById('unitsCounter');
+    const aviaSubMenu = document.getElementById('aviaSubMenu');
 
     const disclaimerBlock = document.getElementById('disclaimerBlock');
     const disclaimerText = document.getElementById('disclaimerText');
     const disclaimerUnits = document.getElementById('disclaimerUnits');
 
     disclaimerText.textContent = appSettings.disclaimerText;
+
+    const speedPopover = document.getElementById('speedPopover');
+    const speedPopoverTitle = document.getElementById('speedPopoverTitle');
+    const speedPopoverClose = document.getElementById('speedPopoverClose');
+    const labelInput = document.getElementById('labelInput');
+    const speedInput = document.getElementById('speedInput');
+    const speedDistHint = document.getElementById('speedDistHint');
+    const speedApplyBtn = document.getElementById('speedApplyBtn');
+    const speedClearBtn = document.getElementById('speedClearBtn');
+    let activeSpeedUnit = null;
+
+    function updateSpeedHint() {
+        const val = parseFloat(speedInput.value);
+        if (!val || val <= 0) {
+            speedDistHint.textContent = 'Дистанция за 1 мин: 0 км (без пунктира)';
+        } else {
+            const km = (val / 60).toFixed(2);
+            speedDistHint.textContent = `Дистанция за 1 мин: ${km} км`;
+        }
+    }
+
+    function openSpeedPopover(unitObj, clientX, clientY) {
+        activeSpeedUnit = unitObj;
+        speedPopoverTitle.textContent = `${unitObj.defaultLabel} — параметры`;
+        labelInput.value = unitObj.label || '';
+        speedInput.value = unitObj.speed > 0 ? String(unitObj.speed) : '';
+        updateSpeedHint();
+
+        const popW = 236;
+        const popH = 245;
+        let left = clientX + 12;
+        let top = clientY - 20;
+        if (left + popW > window.innerWidth - 12) left = clientX - popW - 12;
+        if (top + popH > window.innerHeight - 12) top = window.innerHeight - popH - 12;
+        if (left < 12) left = 12;
+        if (top < 12) top = 12;
+
+        speedPopover.style.left = `${left}px`;
+        speedPopover.style.top = `${top}px`;
+        speedPopover.classList.add('open');
+
+        setTimeout(() => {
+            labelInput.focus();
+            labelInput.select();
+        }, 10);
+    }
+
+    function closeSpeedPopover() {
+        speedPopover.classList.remove('open');
+        activeSpeedUnit = null;
+    }
+
+    labelInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            speedApplyBtn.click();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeSpeedPopover();
+        }
+    });
+
+    speedInput.addEventListener('input', updateSpeedHint);
+
+    speedInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            speedApplyBtn.click();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeSpeedPopover();
+        }
+    });
+
+    speedPopover.querySelectorAll('.speed-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            speedInput.value = btn.dataset.speed;
+            updateSpeedHint();
+            speedInput.focus();
+        });
+    });
+
+    speedApplyBtn.addEventListener('click', () => {
+        if (!activeSpeedUnit) return;
+        const trimmedLabel = labelInput.value.trim();
+        activeSpeedUnit.label = trimmedLabel || activeSpeedUnit.defaultLabel;
+        const val = parseFloat(speedInput.value);
+        activeSpeedUnit.speed = val > 0 ? val : 0;
+        updateUnitVectorsLayer();
+        updateDisclaimerUnits();
+        closeSpeedPopover();
+    });
+
+    speedClearBtn.addEventListener('click', () => {
+        if (!activeSpeedUnit) return;
+        activeSpeedUnit.label = activeSpeedUnit.defaultLabel;
+        activeSpeedUnit.speed = 0;
+        updateUnitVectorsLayer();
+        updateDisclaimerUnits();
+        closeSpeedPopover();
+    });
+
+    speedPopoverClose.addEventListener('click', closeSpeedPopover);
+
+    document.addEventListener('mousedown', (e) => {
+        if (e.button === 1) return;
+        if (speedPopover.classList.contains('open') && !speedPopover.contains(e.target)) {
+            closeSpeedPopover();
+        }
+    });
 
     function updateDisclaimerUnits() {
         const bounds = map.getBounds();
@@ -2027,8 +2493,9 @@
         spawnedUnits.forEach(unit => {
             const lngLat = unit.marker.getLngLat();
             if (bounds.contains(lngLat)) {
-                if (!uniqueUnits.has(unit.label)) {
-                    uniqueUnits.set(unit.label, { file: unit.file, label: unit.label });
+                const key = `${unit.file}::${unit.label}`;
+                if (!uniqueUnits.has(key)) {
+                    uniqueUnits.set(key, { file: unit.file, label: unit.label });
                 }
             }
         });
@@ -2043,9 +2510,12 @@
             const item = document.createElement('span');
             item.className = 'disclaimer-unit-item';
 
+            const iconPx = getDisclaimerIconSize(data.file);
             const img = document.createElement('img');
             img.src = `./icons/${data.file}`;
             img.alt = data.label;
+            img.style.width = `${iconPx}px`;
+            img.style.height = 'auto';
 
             const text = document.createElement('span');
             text.textContent = data.label;
@@ -2067,9 +2537,11 @@
             clearUnitsBtn.classList.remove('visible');
         }
         updateDisclaimerUnits();
+        updateUnitVectorsLayer();
     }
 
     function removeSpawnedUnit(unitObj) {
+        if (activeSpeedUnit === unitObj) closeSpeedPopover();
         const idx = spawnedUnits.indexOf(unitObj);
         if (idx !== -1) {
             unitObj.marker.remove();
@@ -2081,6 +2553,7 @@
     }
 
     clearUnitsBtn.addEventListener('click', () => {
+        closeSpeedPopover();
         while (spawnedUnits.length > 0) {
             const u = spawnedUnits.pop();
             if (u.cleanupGesture) u.cleanupGesture();
@@ -2092,6 +2565,7 @@
     });
 
     document.addEventListener('keydown', (e) => {
+        if (document.activeElement === speedInput || document.activeElement === labelInput) return;
         if ((e.key === 'Delete' || e.key === 'Backspace') && hoveredUnit) {
             removeSpawnedUnit(hoveredUnit);
         }
@@ -2136,13 +2610,25 @@
         const unitObj = {
             id: Date.now() + Math.random(),
             file: item.file,
+            defaultLabel: item.label,
             label: item.label,
             img: img,
             wrapper: wrapper,
             badge: badge,
             marker: marker,
-            angle: 0
+            angle: 0,
+            speed: 0,
+            color: '#e01b1b'
         };
+
+        if (img.complete && img.naturalWidth > 0) {
+            unitObj.color = extractIconDominantColor(img, item.file);
+        } else {
+            img.addEventListener('load', () => {
+                unitObj.color = extractIconDominantColor(img, item.file);
+                if (unitObj.speed > 0) updateUnitVectorsLayer();
+            });
+        }
 
         wrapper.addEventListener('mouseenter', () => { hoveredUnit = unitObj; });
         wrapper.addEventListener('mouseleave', () => { if (hoveredUnit === unitObj) hoveredUnit = null; });
@@ -2157,6 +2643,7 @@
             badgeTimer = setTimeout(() => {
                 wrapper.classList.remove('rotating');
             }, 650);
+            if (unitObj.speed > 0) updateUnitVectorsLayer();
         }
 
         wrapper.addEventListener('wheel', (e) => {
@@ -2178,6 +2665,12 @@
         let mouseStartLngLat = null;
 
         function onImgMouseDown(e) {
+            if (e.button === 1) {
+                e.stopPropagation();
+                e.preventDefault();
+                openSpeedPopover(unitObj, e.clientX, e.clientY);
+                return;
+            }
             if (e.button !== 0) return;
             e.stopPropagation();
             e.preventDefault();
@@ -2185,6 +2678,13 @@
             mouseStart = { x: e.clientX, y: e.clientY };
             mouseStartLngLat = marker.getLngLat();
             map.dragPan.disable();
+        }
+
+        function onImgAuxClick(e) {
+            if (e.button === 1) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
         }
 
         function onWindowMouseMove(e) {
@@ -2195,6 +2695,7 @@
             const newLngLat = map.unproject([startPx.x + dx, startPx.y + dy]);
             marker.setLngLat(newLngLat);
             updateDisclaimerUnits();
+            if (unitObj.speed > 0) updateUnitVectorsLayer();
         }
 
         function onWindowMouseUp() {
@@ -2204,6 +2705,7 @@
         }
 
         img.addEventListener('mousedown', onImgMouseDown);
+        img.addEventListener('auxclick', onImgAuxClick);
         window.addEventListener('mousemove', onWindowMouseMove);
         window.addEventListener('mouseup', onWindowMouseUp);
 
@@ -2289,6 +2791,7 @@
                 const newLngLat = map.unproject([startPx.x + dx, startPx.y + dy]);
                 marker.setLngLat(newLngLat);
                 updateDisclaimerUnits();
+                if (unitObj.speed > 0) updateUnitVectorsLayer();
             } else if (touchMode === 'rotate' && e.touches.length === 2) {
                 const currentAngle = getTouchAngle(e.touches[0], e.touches[1]);
                 let delta = currentAngle - rotateStartAngle;
@@ -2336,7 +2839,34 @@
         updateUnitsCounter();
     }
 
+    let aviaHideTimer = null;
+
+    function positionAviaSubMenu(groupEl) {
+        const rect = groupEl.getBoundingClientRect();
+        aviaSubMenu.style.left = `${Math.round(rect.left + rect.width / 2 - 29)}px`;
+        aviaSubMenu.style.bottom = `${Math.round(window.innerHeight - rect.top + 8)}px`;
+    }
+
+    function showAviaSubMenu(groupEl) {
+        clearTimeout(aviaHideTimer);
+        positionAviaSubMenu(groupEl);
+        aviaSubMenu.classList.add('open');
+    }
+
+    function scheduleHideAviaSubMenu() {
+        clearTimeout(aviaHideTimer);
+        aviaHideTimer = setTimeout(() => {
+            aviaSubMenu.classList.remove('open');
+        }, 160);
+    }
+
+    aviaSubMenu.addEventListener('mouseenter', () => clearTimeout(aviaHideTimer));
+    aviaSubMenu.addEventListener('mouseleave', scheduleHideAviaSubMenu);
+
     UNIT_CATALOG.forEach(item => {
+        const group = document.createElement('div');
+        group.className = 'spawn-item-group';
+
         const btn = document.createElement('button');
         btn.className = 'spawn-item-btn';
         btn.title = `Добавить: ${item.label}`;
@@ -2351,9 +2881,37 @@
 
         btn.appendChild(img);
         btn.appendChild(span);
-
         btn.addEventListener('click', () => spawnUnitOnMap(item));
-        spawnDock.appendChild(btn);
+        group.appendChild(btn);
+
+        if (item.subVariants && item.subVariants.length > 0) {
+            item.subVariants.forEach(sub => {
+                const subBtn = document.createElement('button');
+                subBtn.className = 'spawn-item-btn';
+                subBtn.title = `Добавить: ${sub.label}`;
+
+                const subImg = document.createElement('img');
+                subImg.src = `./icons/${sub.file}`;
+                subImg.alt = sub.label;
+
+                const subSpan = document.createElement('span');
+                subSpan.className = 'spawn-item-label';
+                subSpan.textContent = sub.label;
+
+                subBtn.appendChild(subImg);
+                subBtn.appendChild(subSpan);
+                subBtn.addEventListener('click', () => {
+                    spawnUnitOnMap(sub);
+                    aviaSubMenu.classList.remove('open');
+                });
+                aviaSubMenu.appendChild(subBtn);
+            });
+
+            group.addEventListener('mouseenter', () => showAviaSubMenu(group));
+            group.addEventListener('mouseleave', scheduleHideAviaSubMenu);
+        }
+
+        spawnDock.appendChild(group);
     });
 
     const openUnitSizesBtn = document.getElementById('openUnitSizesBtn');
@@ -2363,7 +2921,7 @@
 
     function renderUnitSizesPopover() {
         unitSizesList.innerHTML = '';
-        UNIT_CATALOG.forEach(item => {
+        ALL_SIZE_UNITS.forEach(item => {
             const row = document.createElement('div');
             row.className = 'unit-size-item';
 
@@ -2490,6 +3048,8 @@
     let snipRect = { x: 0, y: 0, w: 0, h: 0 };
 
     function startSnippingMode() {
+        closeSpeedPopover();
+        aviaSubMenu.classList.remove('open');
         if (backdrop.classList.contains('open')) closeModal();
         if (unitSizesPopover.classList.contains('open')) {
             unitSizesPopover.classList.remove('open');
@@ -2517,6 +3077,7 @@
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            if (speedPopover.classList.contains('open')) closeSpeedPopover();
             if (isSnippingMode) stopSnippingMode();
             if (unitSizesPopover.classList.contains('open')) {
                 unitSizesPopover.classList.remove('open');
@@ -2834,114 +3395,98 @@
 
         const dCanvas = document.createElement('canvas');
         dCanvas.width = Math.ceil((dWidth + dPad * 2) * target4kScale);
-        dCanvas.height = Math.ceil(400 * target4kScale);
+        dCanvas.height = Math.ceil(500 * target4kScale);
         const dCtx = dCanvas.getContext('2d');
         dCtx.scale(target4kScale, target4kScale);
         dCtx.translate(dPad, dPad);
-        dCtx.fillStyle = '#ffffff';
-        dCtx.strokeStyle = '#000000';
-        dCtx.lineWidth = 1.3;
-        
-        dCtx.font = '13px Arial, sans-serif';
-        dCtx.fillStyle = '#1f2937';
-        dCtx.textBaseline = 'top';
-        dCtx.textAlign = 'left';
-        
+
         const pad = 14;
         const maxWidth = dWidth - pad * 2;
-        const words = appSettings.disclaimerText.split(' ');
-        let line = '';
-        let lineY = pad;
         const lineHeight = 13 * 1.4;
-
-        for (let i = 0; i < words.length; i++) {
-            const testLine = line + words[i] + ' ';
-            const metrics = dCtx.measureText(testLine);
-            if (metrics.width > maxWidth && line !== '') {
-                dCtx.fillText(line.trim(), pad, lineY);
-                line = words[i] + ' ';
-                lineY += lineHeight;
-            } else {
-                line = testLine;
-            }
-        }
-        if (line.trim()) {
-            dCtx.fillText(line.trim(), pad, lineY);
-            lineY += lineHeight;
-        }
-
-        lineY += 4;
-        dCtx.beginPath();
-        dCtx.strokeStyle = '#e5e7eb';
-        dCtx.lineWidth = 1;
-        dCtx.moveTo(pad, lineY);
-        dCtx.lineTo(dWidth - pad, lineY);
-        dCtx.stroke();
-        lineY += 4;
 
         const bounds = map.getBounds();
         const uniqueUnits = new Map();
         spawnedUnits.forEach(unit => {
             const lngLat = unit.marker.getLngLat();
             if (bounds.contains(lngLat)) {
-                if (!uniqueUnits.has(unit.label)) {
-                    uniqueUnits.set(unit.label, { file: unit.file, label: unit.label });
+                const key = `${unit.file}::${unit.label}`;
+                if (!uniqueUnits.has(key)) {
+                    uniqueUnits.set(key, { file: unit.file, label: unit.label });
                 }
             }
         });
 
-        if (uniqueUnits.size === 0) {
-            dCtx.font = 'italic 12px Arial, sans-serif';
-            dCtx.fillStyle = '#9ca3af';
-            dCtx.fillText('Нет объектов в кадре', pad, lineY);
-            lineY += 16;
-        } else {
-            let itemX = pad;
-            const iconSize = 20;
-            const gap = 10;
+        const loadedIcons = new Map();
+        await Promise.all(
+            Array.from(uniqueUnits.values()).map(data => new Promise(resolve => {
+                const im = new Image();
+                im.onload = () => { loadedIcons.set(data.file, im); resolve(); };
+                im.onerror = () => resolve();
+                im.src = `./icons/${data.file}`;
+            }))
+        );
 
-            uniqueUnits.forEach((data) => {
-                const img = new Image();
-                img.src = `./icons/${data.file}`;
-                img.alt = data.label;
-
-                dCtx.font = '600 13px Arial, sans-serif';
-                const textW = dCtx.measureText(data.label).width;
-                const totalW = iconSize + 6 + textW;
-
-                if (itemX + totalW > dWidth - pad) {
-                    itemX = pad;
-                    lineY += 22;
+        function computeDisclaimerLayout(ctxToMeasure) {
+            ctxToMeasure.font = '13px Arial, sans-serif';
+            const words = appSettings.disclaimerText.split(' ');
+            let line = '';
+            let y = pad;
+            for (let i = 0; i < words.length; i++) {
+                const testLine = line + words[i] + ' ';
+                if (ctxToMeasure.measureText(testLine).width > maxWidth && line !== '') {
+                    y += lineHeight;
+                    line = words[i] + ' ';
+                } else {
+                    line = testLine;
                 }
+            }
+            if (line.trim()) y += lineHeight;
 
-                if (img.complete && img.naturalWidth > 0) {
-                    const aspect = img.naturalHeight / img.naturalWidth;
-                    let drawW = iconSize;
-                    let drawH = iconSize * aspect;
-                    if (drawW > iconSize) {
-                        drawW = iconSize;
-                        drawH = iconSize * aspect;
+            y += 8;
+            const dividerY = y;
+            y += 8;
+
+            const rows = [];
+            if (uniqueUnits.size === 0) {
+                rows.push({ empty: true, y, h: 16 });
+                y += 16;
+            } else {
+                let rowItems = [];
+                let rowW = 0;
+                const gap = 10;
+                ctxToMeasure.font = '600 13px Arial, sans-serif';
+
+                uniqueUnits.forEach(data => {
+                    const iconSize = getDisclaimerIconSize(data.file);
+                    const im = loadedIcons.get(data.file);
+                    const aspect = (im && im.naturalWidth > 0) ? (im.naturalHeight / im.naturalWidth) : 1;
+                    const drawH = iconSize * Math.min(1.2, Math.max(0.6, aspect));
+                    const textW = ctxToMeasure.measureText(data.label).width;
+                    const itemW = iconSize + 6 + textW;
+                    const rowH = Math.max(20, drawH);
+
+                    if (rowItems.length > 0 && rowW + gap + itemW > maxWidth) {
+                        const maxRowH = Math.max(...rowItems.map(it => it.rowH));
+                        rows.push({ items: rowItems, y, h: maxRowH });
+                        y += maxRowH + 6;
+                        rowItems = [];
+                        rowW = 0;
                     }
-                    if (drawH > iconSize) {
-                        drawH = iconSize;
-                        drawW = iconSize / aspect;
-                    }
-                    const offsetX = (iconSize - drawW) / 2;
-                    const offsetY = (iconSize - drawH) / 2;
-                    dCtx.drawImage(img, itemX + offsetX, lineY + offsetY, drawW, drawH);
+                    rowItems.push({ data, iconSize, drawH, textW, itemW, rowH });
+                    rowW += (rowItems.length > 1 ? gap : 0) + itemW;
+                });
+                if (rowItems.length > 0) {
+                    const maxRowH = Math.max(...rowItems.map(it => it.rowH));
+                    rows.push({ items: rowItems, y, h: maxRowH });
+                    y += maxRowH;
                 }
+            }
 
-                dCtx.fillStyle = '#374151';
-                dCtx.textBaseline = 'middle';
-                dCtx.fillText(data.label, itemX + iconSize + 6, lineY + iconSize / 2);
-
-                itemX += totalW + gap;
-            });
+            return { totalH: y + pad, dividerY, rows };
         }
 
-        lineY += 16;
-
-        const totalH = lineY + pad;
+        const layout = computeDisclaimerLayout(dCtx);
+        const totalH = layout.totalH;
         dCanvas.height = Math.ceil((totalH + dPad * 2) * target4kScale);
 
         dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
@@ -2950,10 +3495,10 @@
         dCtx.translate(dPad, dPad);
 
         dCtx.fillStyle = '#ffffff';
-        dCtx.strokeStyle = '#000000';
-        dCtx.lineWidth = 1.3;
+        dCtx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
+        dCtx.lineWidth = 0.75;
         dCtx.beginPath();
-        const r = 5;
+        const r = 2.5;
         const x0 = 0, y0 = 0, w0 = dWidth, h0 = totalH;
         dCtx.moveTo(x0 + r, y0);
         dCtx.lineTo(x0 + w0 - r, y0);
@@ -2976,11 +3521,9 @@
         let recY = pad;
         const recWords = appSettings.disclaimerText.split(' ');
         let recLine = '';
-        
         for (let i = 0; i < recWords.length; i++) {
             const testLine = recLine + recWords[i] + ' ';
-            const metrics = dCtx.measureText(testLine);
-            if (metrics.width > maxWidth && recLine !== '') {
+            if (dCtx.measureText(testLine).width > maxWidth && recLine !== '') {
                 dCtx.fillText(recLine.trim(), pad, recY);
                 recLine = recWords[i] + ' ';
                 recY += lineHeight;
@@ -2990,59 +3533,35 @@
         }
         if (recLine.trim()) {
             dCtx.fillText(recLine.trim(), pad, recY);
-            recY += lineHeight;
         }
 
-        recY += 4;
         dCtx.beginPath();
         dCtx.strokeStyle = '#e5e7eb';
         dCtx.lineWidth = 1;
-        dCtx.moveTo(pad, recY);
-        dCtx.lineTo(dWidth - pad, recY);
+        dCtx.moveTo(pad, layout.dividerY);
+        dCtx.lineTo(dWidth - pad, layout.dividerY);
         dCtx.stroke();
-        recY += 4;
 
         if (uniqueUnits.size === 0) {
             dCtx.font = 'italic 12px Arial, sans-serif';
             dCtx.fillStyle = '#9ca3af';
-            dCtx.fillText('Нет объектов в кадре', pad, recY);
+            dCtx.fillText('Нет объектов в кадре', pad, layout.rows[0].y);
         } else {
-            let itemX = pad;
-            const iconSize = 20;
             const gap = 10;
-
-            uniqueUnits.forEach((data) => {
-                const img = new Image();
-                img.src = `./icons/${data.file}`;
-                img.alt = data.label;
-
-                dCtx.font = '600 13px Arial, sans-serif';
-                const textW = dCtx.measureText(data.label).width;
-                const totalW = iconSize + 6 + textW;
-
-                if (itemX + totalW > dWidth - pad) {
-                    itemX = pad;
-                    recY += 22;
-                }
-
-                if (img.complete && img.naturalWidth > 0) {
-                    const aspect = img.naturalHeight / img.naturalWidth;
-                    let drawW = iconSize;
-                    let drawH = iconSize * aspect;
-                    if (drawH > iconSize) {
-                        drawH = iconSize;
-                        drawW = iconSize / aspect;
+            layout.rows.forEach(row => {
+                let itemX = pad;
+                const centerY = row.y + row.h / 2;
+                row.items.forEach(it => {
+                    const im = loadedIcons.get(it.data.file);
+                    if (im && im.naturalWidth > 0) {
+                        dCtx.drawImage(im, itemX, centerY - it.drawH / 2, it.iconSize, it.drawH);
                     }
-                    const offsetX = (iconSize - drawW) / 2;
-                    const offsetY = (iconSize - drawH) / 2;
-                    dCtx.drawImage(img, itemX + offsetX, recY + offsetY, drawW, drawH);
-                }
-
-                dCtx.fillStyle = '#374151';
-                dCtx.textBaseline = 'middle';
-                dCtx.fillText(data.label, itemX + iconSize + 6, recY + iconSize / 2);
-
-                itemX += totalW + gap;
+                    dCtx.fillStyle = '#374151';
+                    dCtx.font = '600 13px Arial, sans-serif';
+                    dCtx.textBaseline = 'middle';
+                    dCtx.fillText(it.data.label, itemX + it.iconSize + 6, centerY);
+                    itemX += it.itemW + gap;
+                });
             });
         }
 
@@ -3088,6 +3607,8 @@
         spawnedUnits.forEach(u => {
             u.img.style.width = `${getEffectiveUnitSize(u.file)}px`;
         });
+
+        updateDisclaimerUnits();
 
         if (refreshPopover && unitSizesPopover.classList.contains('open')) {
             renderUnitSizesPopover();
@@ -3196,6 +3717,7 @@
     }
 
     function openModal() {
+        closeSpeedPopover();
         if (unitSizesPopover.classList.contains('open')) {
             unitSizesPopover.classList.remove('open');
             openUnitSizesBtn.classList.remove('active');
